@@ -1,0 +1,414 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { slugifyTag } from '../utils/tag';
+import { SITE } from '../config';
+import { getPostSlug, getPublishedPosts } from '../utils/posts';
+import type { BlogPost } from '../utils/posts';
+
+let allPosts: BlogPost[] = [];
+try {
+  allPosts = await getCollection('blog');
+} catch (e) {
+  allPosts = [];
+}
+const posts = getPublishedPosts(allPosts);
+
+// 按年份分组
+const groupedPosts = posts.reduce((groups, post) => {
+  const year = post.data.date.getFullYear();
+  if (!groups[year]) groups[year] = [];
+  groups[year].push(post);
+  return groups;
+}, {} as Record<number, typeof posts>);
+
+const years = Object.keys(groupedPosts).map(Number).sort((a, b) => b - a);
+
+// 提取并聚合所有标签及文章数，以 slug 作为唯一键，避免大小写/空格割裂
+const tagGroups = posts.flatMap(post => post.data.tags || []).reduce((acc, tag) => {
+  const slug = slugifyTag(tag);
+  if (!slug) return acc;
+  if (!acc[slug]) {
+    acc[slug] = { name: tag, count: 0 };
+  }
+  acc[slug].count += 1;
+  return acc;
+}, {} as Record<string, { name: string; count: number }>);
+
+const tags = Object.keys(tagGroups).sort((a, b) => tagGroups[b].count - tagGroups[a].count);
+
+// 格式化日期的辅助函数 (如 "06-12")
+const formatDateMonth = (date: Date) => {
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${m}-${d}`;
+};
+---
+
+<Layout title={`归档与标签 - ${SITE.title}`} description="按发布年份与标签归档的所有博客文章列表。">
+  <div class="archive-layout container">
+    <header class="archive-header">
+      <h1 class="archive-main-title">归档</h1>
+      <p class="archive-subtitle">当前共有 {posts.length} 篇文章</p>
+    </header>
+
+    <!-- 搜索栏 -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          id="archive-search" 
+          placeholder="搜索文章标题、标签或简介..." 
+          aria-label="搜索文章"
+          autocomplete="off"
+        />
+        <button id="search-clear" class="search-clear-btn" aria-label="清除搜索" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. 标签云 -->
+    {tags.length > 0 && (
+      <section class="tags-cloud-section">
+        <h3 class="section-sub-title">标签墙</h3>
+        <div class="tags-cloud">
+          {tags.map(slug => (
+            <a href={`/tags/${slug}/`} class="tag-cloud-item">
+              <span class="tag-name">#{tagGroups[slug].name}</span>
+              <span class="tag-count">({tagGroups[slug].count})</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 2. 年份归档时间线 -->
+    <section class="timeline-section">
+      {years.map(year => (
+        <div class="timeline-year-group">
+          <h2 class="timeline-year">{year} <span class="tl-year-count">{groupedPosts[year].length} 篇</span></h2>
+          <div class="timeline-posts">
+            {groupedPosts[year].map(post => {
+              const slug = getPostSlug(post);
+              return (
+                <div class="timeline-post-item" data-title={post.data.title.toLowerCase()} data-description={post.data.description.toLowerCase()} data-tags={post.data.tags?.join(',').toLowerCase() || ''}>
+                  <span class="timeline-date">{formatDateMonth(post.data.date)}</span>
+                  <div class="timeline-post-detail">
+                    <h3 class="timeline-post-title">
+                      <a href={`/blog/${slug}/`}>{post.data.title}</a>
+                    </h3>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <!-- 搜索无结果占位 -->
+    <div id="search-empty" class="search-empty-state" style="display: none;">
+      <p>没有找到匹配的文章，请尝试换个关键词。</p>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .archive-layout {
+    max-width: 760px;
+    padding-top: 5.5rem;
+  }
+  .archive-header {
+    margin-bottom: 3rem;
+  }
+  .archive-main-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .archive-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+
+  /* 标签云样式 */
+  .tags-cloud-section {
+    margin-bottom: 3.5rem;
+  }
+  .section-sub-title {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    color: var(--text-main);
+  }
+  .tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .tag-cloud-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.8rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-main);
+  }
+  .tag-cloud-item:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  
+  .tag-count {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* 时间线样式 */
+  .timeline-section {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .timeline-year-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .timeline-year {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  .tl-year-count {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+  .timeline-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-left: 0.5rem;
+  }
+  .timeline-post-item {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+  }
+  .timeline-date {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    width: 45px;
+    flex-shrink: 0;
+  }
+  .timeline-post-detail {
+    flex-grow: 1;
+  }
+  .timeline-post-title {
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+  .timeline-post-title a {
+    color: var(--text-main);
+  }
+  .timeline-post-title a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* 搜索框样式 */
+  .search-container {
+    margin-bottom: 2.5rem;
+  }
+  .search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.2rem 0.5rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-wrapper:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+  }
+  .search-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  #archive-search {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.95rem;
+    font-family: var(--font-sans);
+    color: var(--text-main);
+    outline: none;
+  }
+  #archive-search::placeholder {
+    color: var(--text-muted);
+    opacity: 0.65;
+  }
+  .search-clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0.4rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .search-clear-btn:hover {
+    background: var(--border-color);
+    color: var(--text-main);
+  }
+  .search-clear-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* 搜索无结果 */
+  .search-empty-state {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 2rem;
+  }
+</style>
+
+<script>
+  function initArchiveSearch() {
+    const searchInput = document.getElementById('archive-search') as HTMLInputElement | null;
+    const searchClear = document.getElementById('search-clear') as HTMLButtonElement | null;
+    const searchEmpty = document.getElementById('search-empty') as HTMLDivElement | null;
+    const postItems = document.querySelectorAll('.timeline-post-item');
+    const yearGroups = document.querySelectorAll('.timeline-year-group');
+    const tagItems = document.querySelectorAll('.tag-cloud-item');
+
+    if (!searchInput) return;
+
+    function handleSearch() {
+      const query = searchInput!.value.trim().toLowerCase();
+      
+      // 控制清除按钮的显示与隐藏
+      if (searchClear) {
+        searchClear.style.display = query ? 'flex' : 'none';
+      }
+
+      let visiblePostsCount = 0;
+
+      // 1. 过滤时间线文章列表
+      postItems.forEach(item => {
+        const htmlItem = item as HTMLElement;
+        const title = htmlItem.dataset.title || '';
+        const description = htmlItem.dataset.description || '';
+        const tags = htmlItem.dataset.tags || '';
+
+        const matches = title.includes(query) || description.includes(query) || tags.includes(query);
+        if (matches) {
+          htmlItem.style.display = 'flex';
+          visiblePostsCount++;
+        } else {
+          htmlItem.style.display = 'none';
+        }
+      });
+
+      // 2. 控制年份标题的智能折叠
+      yearGroups.forEach(group => {
+        const htmlGroup = group as HTMLElement;
+        const groupPosts = htmlGroup.querySelectorAll('.timeline-post-item');
+        let groupVisibleCount = 0;
+        groupPosts.forEach(post => {
+          if ((post as HTMLElement).style.display !== 'none') {
+            groupVisibleCount++;
+          }
+        });
+
+        if (groupVisibleCount > 0) {
+          htmlGroup.style.display = 'flex';
+          const countSpan = htmlGroup.querySelector('.tl-year-count');
+          if (countSpan) {
+            countSpan.textContent = `${groupVisibleCount} 篇`;
+          }
+        } else {
+          htmlGroup.style.display = 'none';
+        }
+      });
+
+      // 3. 过滤高亮匹配的标签
+      tagItems.forEach(tag => {
+        const htmlTag = tag as HTMLElement;
+        const tagName = htmlTag.querySelector('.tag-name')?.textContent?.toLowerCase() || '';
+        if (query && tagName.includes(query)) {
+          htmlTag.style.borderColor = 'var(--color-accent)';
+          htmlTag.style.background = 'var(--color-accent-bg)';
+        } else {
+          htmlTag.style.removeProperty('border-color');
+          htmlTag.style.removeProperty('background');
+        }
+      });
+
+      // 4. 控制搜索无结果状态展示
+      if (searchEmpty) {
+        searchEmpty.style.display = (visiblePostsCount === 0 && query !== '') ? 'block' : 'none';
+      }
+    }
+
+    searchInput.addEventListener('input', handleSearch);
+
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        handleSearch();
+        searchInput.focus();
+      });
+    }
+  }
+
+  // 挂载到 astro:page-load 生命周期以兼容 ClientRouter 路由切换
+  // 使用全局标记防止 ClientRouter 下重复注册导致监听器累积
+  if (!(window as any).__archiveSearchInitialized) {
+    (window as any).__archiveSearchInitialized = true;
+    document.addEventListener('astro:page-load', initArchiveSearch);
+  }
+</script>
+
+
+

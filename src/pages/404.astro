@@ -1,0 +1,194 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE } from '../config';
+---
+
+<Layout title={`404 - 页面未找到 - ${SITE.title}`} description="抱歉，您要寻找的页面不存在或已被移除。" robots="noindex">
+  <div class="error-layout container">
+    <div class="error-card glass-card">
+      <div class="error-visual">
+        <div class="orbit-ring ring-1"></div>
+        <div class="orbit-ring ring-2"></div>
+        <div class="orbit-ring ring-3"></div>
+        <h1 class="error-code">404</h1>
+      </div>
+      <h2 class="error-title">此路不通 (Lost in Space)</h2>
+      <p class="error-desc">你似乎降落到了一个未知的星系。你访问的页面可能已经迷失在太空里，或者地址拼写有误。</p>
+      <div class="error-actions">
+        <a href="/" class="btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="margin-right: 6px;">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          返回首页
+        </a>
+        <a href="/archive/" class="btn-outline">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="margin-right: 6px;">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          浏览归档
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .error-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 3rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .error-card {
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    padding: 4.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: visible;
+  }
+  
+  /* 404 炫酷视觉定位 */
+  .error-visual {
+    position: relative;
+    width: 200px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .error-code {
+    font-family: 'Outfit', var(--font-sans);
+    font-size: 6.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--color-accent) 0%, hsl(calc(var(--hue) + 120), 85%, 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    z-index: 5;
+    letter-spacing: -2px;
+    animation: floatNum 4s ease-in-out infinite alternate;
+  }
+  @keyframes floatNum {
+    0% { transform: translateY(0px) rotate(-1deg); }
+    100% { transform: translateY(-8px) rotate(1deg); }
+  }
+
+  /* 环绕星轨/雷达动效 */
+  .orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px dashed rgba(44, 42, 41, 0.15);
+    z-index: 1;
+    pointer-events: none;
+  }
+  [data-theme="dark"] .orbit-ring {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+
+  .ring-1 {
+    width: 130px;
+    height: 130px;
+    transform: rotateX(70deg) rotateY(15deg);
+    animation: rotateOrbit1 15s linear infinite;
+  }
+  .ring-2 {
+    width: 180px;
+    height: 180px;
+    transform: rotateX(60deg) rotateY(-20deg);
+    animation: rotateOrbit2 20s linear infinite reverse;
+  }
+  .ring-3 {
+    width: 230px;
+    height: 230px;
+    transform: rotateX(75deg) rotateY(0deg);
+    animation: rotateOrbit3 25s linear infinite;
+  }
+  
+  @keyframes rotateOrbit1 {
+    from { transform: rotateX(70deg) rotateY(15deg) rotateZ(0deg); }
+    to { transform: rotateX(70deg) rotateY(15deg) rotateZ(360deg); }
+  }
+  @keyframes rotateOrbit2 {
+    from { transform: rotateX(60deg) rotateY(-20deg) rotateZ(0deg); }
+    to { transform: rotateX(60deg) rotateY(-20deg) rotateZ(360deg); }
+  }
+  @keyframes rotateOrbit3 {
+    from { transform: rotateX(75deg) rotateY(0deg) rotateZ(0deg); }
+    to { transform: rotateX(75deg) rotateY(0deg) rotateZ(360deg); }
+  }
+
+  /* 星轨上的闪烁粒子 */
+  .ring-1::after,
+  .ring-2::after,
+  .ring-3::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 0 0 8px var(--color-accent);
+  }
+  .ring-1::after { top: 0; left: 50%; }
+  .ring-2::after { bottom: 20%; right: 10%; background-color: hsl(calc(var(--hue) + 120), 85%, 65%); }
+  .ring-3::after { top: 30%; left: 0; }
+
+  .error-title {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .error-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 0.5rem;
+  }
+  .error-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    z-index: 10;
+  }
+  .error-actions a {
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 1.6rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  
+  @media (max-width: 640px) {
+    .error-card {
+      padding: 3.5rem 1.5rem;
+    }
+    .error-code {
+      font-size: 5rem;
+    }
+    .error-visual {
+      width: 160px;
+      height: 100px;
+    }
+    .ring-1 { width: 110px; height: 110px; }
+    .ring-2 { width: 150px; height: 150px; }
+    .ring-3 { width: 190px; height: 190px; }
+  }
+</style>

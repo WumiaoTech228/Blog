@@ -1,0 +1,91 @@
+---
+interface Props {
+  animation?: 'fade-up' | 'fade-in' | 'scale-in';
+  delay?: number;
+  threshold?: number;
+  tag?: string;
+}
+
+const {
+  animation = 'fade-up',
+  delay = 0,
+  threshold = 0.15,
+  tag = 'div',
+} = Astro.props;
+
+const Tag = tag as any;
+---
+
+<Tag
+  class="reveal"
+  data-animation={animation}
+  data-delay={delay}
+  data-threshold={threshold}
+>
+  <slot />
+</Tag>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const reveals = document.querySelectorAll<HTMLElement>('.reveal');
+    const observers: IntersectionObserver[] = [];
+
+    reveals.forEach((el) => {
+      const delay = Number(el.dataset.delay) || 0;
+      const threshold = Number(el.dataset.threshold) || 0.15;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const target = entry.target as HTMLElement;
+              if (delay > 0) {
+                target.style.transitionDelay = `${delay}ms`;
+              }
+              target.classList.add('revealed');
+              observer.unobserve(target);
+            }
+          });
+        },
+        { threshold },
+      );
+
+      observer.observe(el);
+      observers.push(observer);
+    });
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        observers.forEach((obs) => obs.disconnect());
+      },
+      { once: true },
+    );
+  });
+</script>
+
+<style is:global>
+  .reveal {
+    opacity: 0;
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal[data-animation='fade-up'] {
+    transform: translateY(30px);
+  }
+
+  .reveal[data-animation='fade-in'] {
+    transform: none;
+  }
+
+  .reveal[data-animation='scale-in'] {
+    transform: scale(0.95);
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+</style>

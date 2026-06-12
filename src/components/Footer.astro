@@ -1,0 +1,128 @@
+---
+import { SITE } from '../config';
+const currentYear = new Date().getFullYear();
+---
+<footer class="main-footer">
+  <div class="container footer-inner">
+    <!-- 社交图标行 -->
+    <div class="footer-social">
+      <a href={SITE.github} target="_blank" rel="noopener noreferrer" class="social-icon-link" title="GitHub" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      </a>
+      <a href={`mailto:${SITE.email}`} class="social-icon-link" title="Email" aria-label="Email">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </a>
+      <a href="/rss.xml" target="_blank" rel="noopener noreferrer" class="social-icon-link" title="RSS" aria-label="RSS 订阅">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+      </a>
+    </div>
+
+    <!-- 版权与链接 -->
+    <div class="footer-meta">
+      <p>&copy; {currentYear} {SITE.title}</p>
+      <span class="footer-dot">&middot;</span>
+      <p>使用 Astro & Keystatic 构建</p>
+    </div>
+
+    <!-- 站点运行时间 -->
+    <p class="footer-uptime" id="footer-uptime">
+      <svg class="uptime-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="display: inline-block; vertical-align: -2px; margin-right: 4px;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span id="footer-uptime-text"></span>
+    </p>
+  </div>
+</footer>
+
+<script>
+  function initUptime() {
+    const el = document.getElementById('footer-uptime-text');
+    if (!el) return;
+    const uptimeEl = el;
+    // 站点上线日期 (请根据实际调整)
+    const startDate = new Date('2025-05-01T00:00:00');
+    function update() {
+      const now = new Date();
+      const diff = now.getTime() - startDate.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      uptimeEl.textContent = `本站已运行 ${days} 天 ${hours} 小时 ${mins} 分钟`;
+    }
+    update();
+    // Update every minute
+    const timer = setInterval(update, 60000);
+    // Clean up on page swap
+    document.addEventListener('astro:before-swap', () => clearInterval(timer), { once: true });
+  }
+  document.addEventListener('astro:page-load', initUptime);
+</script>
+
+<style>
+  .main-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 3rem 0 2.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  /* 社交图标 */
+  .footer-social {
+    display: flex;
+    gap: 1rem;
+  }
+  .social-icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .social-icon-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .social-icon-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* 版权信息 */
+  .footer-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+  .footer-dot {
+    opacity: 0.4;
+  }
+
+  /* 运行时间 */
+  .footer-uptime {
+    font-size: 0.78rem;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+  .footer-uptime:hover {
+    opacity: 1;
+  }
+</style>

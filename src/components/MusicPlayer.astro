@@ -1,0 +1,1341 @@
+---
+/**
+ * MusicPlayer.astro
+ * A floating, premium, lofi music player widget.
+ * Persists and plays continuously across page switches using Astro ClientRouter transition:persist.
+ */
+---
+<div id="music-player-persist" class="music-player-widget" transition:persist>
+  <!-- Hidden Audio element -->
+  <audio id="lofi-audio" preload="auto"></audio>
+
+  <div class="player-inner">
+    <!-- Spinning Vinyl Record Container -->
+    <div class="vinyl-container" id="lofi-vinyl-btn" role="button" tabindex="0" aria-label="播放/暂停音乐">
+      <div class="vinyl-record-wrapper">
+        <div class="vinyl-record">
+          <svg class="vinyl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" fill="#18181b" stroke="#333333" stroke-width="0.8" />
+            <circle cx="12" cy="12" r="7.5" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="1 1" />
+            <circle cx="12" cy="12" r="5" stroke="#2a2a2a" stroke-width="0.5" />
+            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+            <circle cx="12" cy="12" r="0.8" fill="#ffffff" />
+          </svg>
+        </div>
+        <!-- Static vinyl reflection overlay -->
+        <div class="vinyl-reflection"></div>
+        <div class="tonearm-container">
+          <svg class="tonearm-icon" viewBox="0 0 12 24" fill="none" stroke="currentColor">
+            <path d="M6 1 L6 12 L2 18" stroke="var(--color-accent)" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="6" cy="1" r="1.5" fill="var(--color-accent)"/>
+            <rect x="0.5" y="15" width="3" height="4" fill="#a1a1aa" rx="0.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expanded Player Controls and Info -->
+    <div class="player-content">
+      <div class="player-content-left">
+        <div class="track-info">
+          <div class="track-name" id="lofi-track-name">加载中...</div>
+          <div class="track-status" id="lofi-track-status">已暂停</div>
+        </div>
+        <div class="progress-container">
+          <span id="lofi-current-time" class="time-display">00:00</span>
+          <input type="range" id="lofi-progress-slider" min="0" max="100" value="0" class="progress-slider" aria-label="歌曲进度" />
+          <span id="lofi-total-time" class="time-display">00:00</span>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <!-- Previous Track Button -->
+        <button id="lofi-prev-btn" class="control-btn" aria-label="上一首" title="上一首">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="19 20 9 12 19 4 19 20" />
+            <line x1="5" y1="5" x2="5" y2="19" />
+          </svg>
+        </button>
+
+        <!-- Play / Pause Button -->
+        <button id="lofi-play-btn" class="control-btn" aria-label="播放/暂停">
+          <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16" />
+            <rect x="14" y="4" width="4" height="16" />
+          </svg>
+        </button>
+
+        <!-- Next Track Button -->
+        <button id="lofi-next-btn" class="control-btn" aria-label="下一首" title="下一首">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4" />
+            <line x1="19" y1="5" x2="19" y2="19" />
+          </svg>
+        </button>
+
+        <!-- Volume Slider Container -->
+        <div class="volume-slider-container">
+          <!-- Mute / Volume Button -->
+          <button id="lofi-mute-btn" class="control-btn" aria-label="静音/取消静音">
+            <svg class="volume-up-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path class="volume-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" />
+            </svg>
+            <svg class="volume-mute-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="22" y1="9" x2="16" y2="15" />
+              <line x1="16" y1="9" x2="22" y2="15" />
+            </svg>
+          </button>
+          <input type="range" id="lofi-volume-slider" min="0" max="100" value="70" class="volume-slider" aria-label="音量调节" />
+        </div>
+
+        <!-- Playlist Button -->
+        <button id="lofi-list-btn" class="control-btn" aria-label="播放列表" title="播放列表">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Playlist Drawer -->
+      <div class="playlist-drawer" id="lofi-playlist-drawer">
+        <div class="drawer-header">
+          <span>播放列表 <span class="track-count-badge" id="lofi-track-count">0</span></span>
+          <div class="drawer-search-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="lofi-playlist-search" placeholder="搜索歌曲/歌手..." autocomplete="off" />
+          </div>
+        </div>
+        <div class="drawer-list" id="lofi-drawer-list">
+          <!-- Songs list injected here -->
+        </div>
+      </div>
+
+      <!-- Simulated Wave Visualizer -->
+      <div class="visualizer" id="lofi-visualizer">
+        <span class="bar bar-1"></span>
+        <span class="bar bar-2"></span>
+        <span class="bar bar-3"></span>
+        <span class="bar bar-4"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface Track {
+    name: string;
+    artist: string;
+    url: string;
+  }
+
+  import DEFAULT_TRACKS from '../data/netease-playlist.json';
+
+  const activeTracks: Track[] = [...DEFAULT_TRACKS];
+
+  let consecutiveErrors = 0;
+
+
+  function getAudioElements() {
+    const audio = document.getElementById('lofi-audio') as HTMLAudioElement | null;
+    const container = document.getElementById('music-player-persist') as HTMLElement | null;
+    const vinyl = document.getElementById('lofi-vinyl-btn') as HTMLElement | null;
+    const playBtn = document.getElementById('lofi-play-btn') as HTMLButtonElement | null;
+    const prevBtn = document.getElementById('lofi-prev-btn') as HTMLButtonElement | null;
+    const nextBtn = document.getElementById('lofi-next-btn') as HTMLButtonElement | null;
+    const muteBtn = document.getElementById('lofi-mute-btn') as HTMLButtonElement | null;
+    const trackNameEl = document.getElementById('lofi-track-name') as HTMLElement | null;
+    const trackStatusEl = document.getElementById('lofi-track-status') as HTMLElement | null;
+
+    const listBtn = document.getElementById('lofi-list-btn') as HTMLButtonElement | null;
+    const drawer = document.getElementById('lofi-playlist-drawer') as HTMLElement | null;
+    const drawerList = document.getElementById('lofi-drawer-list') as HTMLElement | null;
+
+    const progressSlider = document.getElementById('lofi-progress-slider') as HTMLInputElement | null;
+    const currentTimeEl = document.getElementById('lofi-current-time') as HTMLElement | null;
+    const totalTimeEl = document.getElementById('lofi-total-time') as HTMLElement | null;
+
+    return { audio, container, vinyl, playBtn, prevBtn, nextBtn, muteBtn, trackNameEl, trackStatusEl, listBtn, drawer, drawerList, progressSlider, currentTimeEl, totalTimeEl };
+  }
+
+  function renderPlaylist() {
+    const { drawerList, audio } = getAudioElements();
+    if (!drawerList) return;
+    
+    const currentIndex = parseInt(audio?.dataset.currentIndex || '0', 10);
+    const searchInput = document.getElementById('lofi-playlist-search') as HTMLInputElement | null;
+    const countEl = document.getElementById('lofi-track-count') as HTMLElement | null;
+    const query = (searchInput?.value || '').trim().toLowerCase();
+    
+    const itemsHTML: string[] = [];
+    let visibleCount = 0;
+    
+    activeTracks.forEach((track, index) => {
+      const matchName = track.name.toLowerCase().includes(query);
+      const matchArtist = track.artist.toLowerCase().includes(query);
+      if (query && !matchName && !matchArtist) return;
+      
+      visibleCount++;
+      const isActive = index === currentIndex;
+      
+      itemsHTML.push(`
+        <div class="playlist-item ${isActive ? 'active' : ''}" data-index="${index}">
+          <div class="item-left">
+            <span class="item-index">${isActive ? `
+              <span class="playing-equalizer">
+                <span class="eq-bar eq-bar-1"></span>
+                <span class="eq-bar eq-bar-2"></span>
+                <span class="eq-bar eq-bar-3"></span>
+              </span>
+            ` : (index + 1).toString().padStart(2, '0')}</span>
+            <div class="item-meta">
+              <span class="item-name" title="${track.name}">${track.name}</span>
+              <span class="item-artist" title="${track.artist}">${track.artist}</span>
+            </div>
+          </div>
+          <div class="item-right">
+            ${isActive ? '<span class="playing-badge">PLAYING</span>' : ''}
+          </div>
+        </div>
+      `);
+    });
+    
+    if (countEl) {
+      countEl.textContent = query ? `${visibleCount}/${activeTracks.length}` : `${activeTracks.length}`;
+    }
+    
+    if (itemsHTML.length === 0) {
+      drawerList.innerHTML = `<div class="empty-list-state">没有找到相关歌曲 🎵</div>`;
+      return;
+    }
+    
+    drawerList.innerHTML = itemsHTML.join('');
+    
+    const items = drawerList.querySelectorAll('.playlist-item');
+    items.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(item.getAttribute('data-index') || '0', 10);
+        loadTrack(index);
+        const { audio: currentAudio } = getAudioElements();
+        currentAudio?.play().then(syncUIState).catch(() => {});
+      });
+    });
+
+    if (!query) {
+      const activeItem = drawerList.querySelector('.playlist-item.active') as HTMLElement | null;
+      if (activeItem) {
+        const parentRect = drawerList.getBoundingClientRect();
+        const activeRect = activeItem.getBoundingClientRect();
+        if (activeRect.top < parentRect.top) {
+          drawerList.scrollTop -= (parentRect.top - activeRect.top);
+        } else if (activeRect.bottom > parentRect.bottom) {
+          drawerList.scrollTop += (activeRect.bottom - parentRect.bottom);
+        }
+      }
+    }
+  }
+
+  function loadTrack(index: number) {
+    const { audio, trackNameEl, trackStatusEl, currentTimeEl, totalTimeEl, progressSlider } = getAudioElements();
+    if (!audio) return;
+
+    const track = activeTracks[index];
+    if (!track) return;
+    audio.src = track.url;
+    audio.dataset.currentIndex = index.toString();
+    if (trackNameEl) trackNameEl.textContent = track.name;
+    if (trackStatusEl) {
+      trackStatusEl.textContent = audio.paused ? '已暂停' : track.artist;
+    }
+    if (currentTimeEl) currentTimeEl.textContent = '00:00';
+    if (totalTimeEl) totalTimeEl.textContent = '00:00';
+    if (progressSlider) progressSlider.value = '0';
+
+    renderPlaylist();
+  }
+
+  function syncUIState() {
+    const { audio, container, trackStatusEl, trackNameEl } = getAudioElements();
+    if (!audio || !container) return;
+
+    // Toggle playing class
+    if (audio.paused) {
+      container.classList.remove('is-playing');
+    } else {
+      container.classList.add('is-playing');
+    }
+
+    // Toggle muted class
+    if (audio.muted) {
+      container.classList.add('is-muted');
+    } else {
+      container.classList.remove('is-muted');
+    }
+
+    // Sync track texts
+    const currentIndex = parseInt(audio.dataset.currentIndex || '0', 10);
+    const track = activeTracks[currentIndex];
+    if (track) {
+      if (trackNameEl) trackNameEl.textContent = track.name;
+      if (trackStatusEl) {
+        trackStatusEl.textContent = audio.paused ? '已暂停' : track.artist;
+      }
+    }
+    renderPlaylist();
+  }
+
+  function togglePlay() {
+    const { audio } = getAudioElements();
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play()
+        .then(syncUIState)
+        .catch(err => console.debug('浏览器阻止了自动播放，需用户手动交互:', err));
+    } else {
+      audio.pause();
+      syncUIState();
+    }
+  }
+
+  function playNext() {
+    const { audio } = getAudioElements();
+    if (!audio) return;
+
+    let currentIndex = parseInt(audio.dataset.currentIndex || '0', 10);
+    currentIndex = (currentIndex + 1) % activeTracks.length;
+    loadTrack(currentIndex);
+    audio.play()
+      .then(syncUIState)
+      .catch(err => console.debug('播放下一首受阻:', err));
+  }
+
+  function playPrev() {
+    const { audio } = getAudioElements();
+    if (!audio) return;
+
+    let currentIndex = parseInt(audio.dataset.currentIndex || '0', 10);
+    currentIndex = (currentIndex - 1 + activeTracks.length) % activeTracks.length;
+    loadTrack(currentIndex);
+    audio.play()
+      .then(syncUIState)
+      .catch(err => console.debug('播放上一首受阻:', err));
+  }
+
+  function toggleMute() {
+    const { audio } = getAudioElements();
+    const volumeSlider = document.getElementById('lofi-volume-slider') as HTMLInputElement | null;
+    if (!audio) return;
+
+    audio.muted = !audio.muted;
+    
+    if (!audio.muted && audio.volume === 0) {
+      audio.volume = 0.3;
+      if (volumeSlider) volumeSlider.value = '30';
+      localStorage.setItem('lofi-volume', '30');
+    }
+
+    syncUIState();
+  }
+
+  function formatTime(secs: number): string {
+    if (isNaN(secs) || !isFinite(secs)) return '00:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function initPlayer() {
+    const { audio, container, vinyl, playBtn, prevBtn, nextBtn, muteBtn, listBtn, progressSlider, currentTimeEl, totalTimeEl } = getAudioElements();
+    const volumeSlider = document.getElementById('lofi-volume-slider') as HTMLInputElement | null;
+    if (!audio || !container) return;
+
+    // Initialize track if none loaded
+    if (!audio.src) {
+      loadTrack(0);
+    }
+
+    // Set initial volume
+    const savedVolume = localStorage.getItem('lofi-volume') || '70';
+    audio.volume = parseInt(savedVolume, 10) / 100;
+    if (volumeSlider) {
+      volumeSlider.value = savedVolume;
+    }
+
+    syncUIState();
+    renderPlaylist();
+
+    if (container.dataset.initialized) return;
+    container.dataset.initialized = 'true';
+
+    // Click handlers
+    const handleVinylClick = (e: MouseEvent) => {
+      const isCollapsed = container.offsetWidth < 60;
+      if (isCollapsed) {
+        e.preventDefault();
+        e.stopPropagation();
+        container.classList.add('is-expanded');
+        return;
+      }
+      togglePlay();
+    };
+
+    vinyl?.addEventListener('click', handleVinylClick);
+    playBtn?.addEventListener('click', togglePlay);
+    prevBtn?.addEventListener('click', playPrev);
+    nextBtn?.addEventListener('click', playNext);
+    muteBtn?.addEventListener('click', toggleMute);
+
+    // Playlist Toggle
+    listBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      container.classList.toggle('show-playlist');
+      if (container.classList.contains('show-playlist')) {
+        setTimeout(renderPlaylist, 50); // Ensure active item is scrolled into view when opened
+      }
+    });
+
+    // Search input handler
+    const searchInput = document.getElementById('lofi-playlist-search') as HTMLInputElement | null;
+    searchInput?.addEventListener('input', () => {
+      renderPlaylist();
+    });
+
+    // Volume Slider handler
+    volumeSlider?.addEventListener('input', () => {
+      const volVal = parseInt(volumeSlider.value, 10);
+      audio.volume = volVal / 100;
+      localStorage.setItem('lofi-volume', volumeSlider.value);
+      
+      if (volVal === 0) {
+        audio.muted = true;
+      } else {
+        audio.muted = false;
+      }
+      syncUIState();
+    });
+
+    // Progress Slider handler
+    progressSlider?.addEventListener('input', () => {
+      if (!audio.duration) return;
+      const pct = parseFloat(progressSlider.value) / 100;
+      audio.currentTime = audio.duration * pct;
+    });
+
+    // Click outside to collapse
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target as Node)) {
+        container.classList.remove('is-expanded');
+        container.classList.remove('show-playlist');
+      }
+    });
+
+    // Audio status listeners to update UI dynamically
+    audio.addEventListener('play', () => {
+      consecutiveErrors = 0;
+      const { trackStatusEl } = getAudioElements();
+      if (trackStatusEl) {
+        trackStatusEl.style.color = '';
+      }
+      syncUIState();
+    });
+    audio.addEventListener('pause', syncUIState);
+    audio.addEventListener('ended', playNext);
+    audio.addEventListener('error', (e) => {
+      console.warn('播放失败，自动为您跳过至下一首。', e);
+      
+      const { trackStatusEl } = getAudioElements();
+      if (trackStatusEl) {
+        trackStatusEl.textContent = '⚠️ 加载失败，正在跳过...';
+        trackStatusEl.style.color = '#ef4444';
+      }
+      
+      consecutiveErrors++;
+      if (consecutiveErrors >= activeTracks.length) {
+        console.error('所有曲目均加载失败。请检查网络连接或资源可用性。');
+        if (trackStatusEl) {
+          trackStatusEl.textContent = '⚠️ 播放资源不可用';
+        }
+        audio.pause();
+        syncUIState();
+        consecutiveErrors = 0; // reset
+        return;
+      }
+      
+      setTimeout(playNext, 1500);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (!audio.duration) return;
+      const current = audio.currentTime;
+      const duration = audio.duration;
+      if (progressSlider && document.activeElement !== progressSlider) {
+        progressSlider.value = ((current / duration) * 100).toString();
+      }
+      if (currentTimeEl) currentTimeEl.textContent = formatTime(current);
+    });
+
+    audio.addEventListener('loadedmetadata', () => {
+      if (totalTimeEl) totalTimeEl.textContent = formatTime(audio.duration);
+    });
+  }
+
+  // Handle initialization on initial load and View Transition page changes
+  document.addEventListener('astro:page-load', initPlayer);
+</script>
+
+<style>
+  /* ==========================================
+     Lofi Music Player - Premium Glassmorphism
+     ========================================== */
+  .music-player-widget {
+    position: fixed;
+    left: 2rem;
+    bottom: 2rem;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    padding: 7px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.98);
+    /* Fallback: always apply blur+saturate */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+      var(--shadow-sm);
+    transition: 
+      width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      padding 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+      box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+      border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+      background-color 0.3s ease;
+  }
+
+  .music-player-widget:hover,
+  .music-player-widget:focus-within,
+  .music-player-widget.is-expanded,
+  .music-player-widget.show-playlist {
+    width: 430px;
+    height: 60px;
+    padding: 7px 18px 7px 7px;
+    transform: translateY(-2px);
+    overflow: visible;
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Dark Theme Support */
+  :global([data-theme="dark"]) .music-player-widget,
+  :global([data-theme="dark"]) .playlist-drawer {
+    background: rgba(22, 22, 23, 0.98);
+  }
+
+  :global([data-theme="dark"]) .music-player-widget {
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+      var(--shadow-sm);
+  }
+
+  :global([data-theme="dark"]) .music-player-widget:hover,
+  :global([data-theme="dark"]) .music-player-widget:focus-within,
+  :global([data-theme="dark"]) .music-player-widget.is-expanded,
+  :global([data-theme="dark"]) .music-player-widget.show-playlist {
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+      var(--shadow-md);
+  }
+
+
+
+  .player-inner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Vinyl Record & Turntable Tonearm */
+  .vinyl-container {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .vinyl-container:hover {
+    transform: scale(1.08);
+  }
+
+  .vinyl-record-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vinyl-record {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    animation: spin 10s linear infinite;
+    animation-play-state: paused;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  .music-player-widget.is-playing .vinyl-record {
+    animation-play-state: running;
+  }
+
+  .vinyl-icon {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Vinyl Reflection highlight */
+  .vinyl-reflection {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.15) 0deg,
+      rgba(255, 255, 255, 0) 60deg,
+      rgba(255, 255, 255, 0.15) 120deg,
+      rgba(255, 255, 255, 0) 180deg,
+      rgba(255, 255, 255, 0.15) 240deg,
+      rgba(255, 255, 255, 0) 300deg,
+      rgba(255, 255, 255, 0.15) 360deg
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .tonearm-container {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 28px;
+    transform-origin: 8px 1px;
+    transform: rotate(0deg);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .music-player-widget.is-playing .tonearm-container {
+    transform: rotate(22deg);
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Expanded Player Content */
+  .player-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 350px;
+    margin-left: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .music-player-widget:hover .player-content,
+  .music-player-widget:focus-within .player-content,
+  .music-player-widget.is-expanded .player-content,
+  .music-player-widget.show-playlist .player-content {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0.1s;
+  }
+
+  /* Playlist Drawer UI - Redesigned */
+  .playlist-drawer {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px) scale(0.95);
+    transition: 
+      opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0.4s;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.98);
+    /* Fallback: always apply blur+saturate */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+      var(--shadow-md);
+  }
+
+  .music-player-widget.show-playlist .playlist-drawer {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .drawer-header {
+    padding: 12px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  :global([data-theme="dark"]) .drawer-header {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .drawer-header > span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .track-count-badge {
+    font-size: 0.65rem;
+    background: rgba(44, 42, 41, 0.08);
+    padding: 1px 6px;
+    border-radius: 99px;
+    color: var(--text-muted);
+  }
+
+  :global([data-theme="dark"]) .track-count-badge {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .drawer-search-container {
+    display: flex;
+    align-items: center;
+    background: rgba(44, 42, 41, 0.06);
+    border-radius: 8px;
+    padding: 4px 8px;
+    gap: 6px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  :global([data-theme="dark"]) .drawer-search-container {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .drawer-search-container:focus-within {
+    border-color: rgba(var(--color-accent-rgb, 99, 102, 241), 0.3);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb, 99, 102, 241), 0.1);
+  }
+
+  :global([data-theme="dark"]) .drawer-search-container:focus-within {
+    background: rgba(20, 20, 20, 0.9);
+  }
+
+  .drawer-search-container .search-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .drawer-search-container input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.72rem;
+    color: var(--text-main);
+    width: 100%;
+    padding: 0;
+  }
+
+  .drawer-search-container input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.8;
+  }
+
+  .drawer-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+    max-height: 220px;
+  }
+
+  .drawer-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .drawer-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .drawer-list::-webkit-scrollbar-thumb {
+    background: rgba(44, 42, 41, 0.1);
+    border-radius: 99px;
+  }
+
+  :global([data-theme="dark"]) .drawer-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Playlist Items are styled below in is:global block */
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Track Info Left Container */
+  .player-content-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    width: 145px;
+    min-width: 0;
+    height: 100%;
+  }
+  .track-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .track-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .track-status {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  /* Progress Slider CSS */
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    margin-top: 1px;
+  }
+  .time-display {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .progress-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(44, 42, 41, 0.15);
+    outline: none;
+    cursor: pointer;
+    transition: height 0.2s ease;
+    min-width: 0;
+  }
+  :global([data-theme="dark"]) .progress-slider {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .progress-slider:hover {
+    height: 5px;
+  }
+  .progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .progress-slider:hover::-webkit-slider-thumb {
+    opacity: 1;
+  }
+
+  /* Controls */
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .control-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 0;
+  }
+
+  .control-btn:hover {
+    color: var(--color-accent);
+    background-color: var(--color-accent-bg);
+    transform: scale(1.05);
+  }
+
+  .control-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Play/Pause Main Button styling redesign */
+  #lofi-play-btn {
+    background: var(--color-accent);
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 4px 10px rgba(var(--color-accent-rgb, 99, 102, 241), 0.25);
+  }
+
+  #lofi-play-btn:hover {
+    background: var(--color-accent);
+    color: #ffffff;
+    transform: scale(1.1);
+    box-shadow: 0 6px 14px rgba(var(--color-accent-rgb, 99, 102, 241), 0.35);
+  }
+
+  :global([data-theme="dark"]) #lofi-play-btn {
+    background: var(--color-accent);
+    color: #ffffff;
+  }
+
+  /* Play / Pause Toggle CSS rules */
+  .music-player-widget.is-playing #lofi-play-btn .play-icon {
+    display: none !important;
+  }
+  .music-player-widget.is-playing #lofi-play-btn .pause-icon {
+    display: block !important;
+  }
+  .music-player-widget:not(.is-playing) #lofi-play-btn .play-icon {
+    display: block !important;
+  }
+  .music-player-widget:not(.is-playing) #lofi-play-btn .pause-icon {
+    display: none !important;
+  }
+
+  /* Mute / Unmute Toggle CSS rules */
+  .music-player-widget.is-muted #lofi-mute-btn .volume-up-icon {
+    display: none !important;
+  }
+  .music-player-widget.is-muted #lofi-mute-btn .volume-mute-icon {
+    display: block !important;
+  }
+  .music-player-widget:not(.is-muted) #lofi-mute-btn .volume-up-icon {
+    display: block !important;
+  }
+  .music-player-widget:not(.is-muted) #lofi-mute-btn .volume-mute-icon {
+    display: none !important;
+  }
+
+  /* Simulated Wave Visualizer */
+  .visualizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 2.5px;
+    height: 14px;
+    width: 18px;
+    margin-right: 2px;
+    flex-shrink: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .music-player-widget.is-playing .visualizer {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Volume Slider styling */
+  .volume-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+  .volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(44, 42, 41, 0.15);
+    outline: none;
+    opacity: 0;
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease;
+    cursor: pointer;
+  }
+  :global([data-theme="dark"]) .volume-slider {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: transform 0.1s ease;
+  }
+  .volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+  }
+  
+  .music-player-widget:hover .volume-slider,
+  .music-player-widget:focus-within .volume-slider,
+  .music-player-widget.is-expanded .volume-slider {
+    width: 50px;
+    opacity: 1;
+    margin-left: 2px;
+  }
+
+  .bar {
+    width: 2.2px;
+    height: 3px;
+    background-color: var(--color-accent);
+    border-radius: 99px;
+    transition: height 0.15s ease;
+  }
+
+  @keyframes bounce-1 {
+    0%, 100% { height: 4px; }
+    50% { height: 12px; }
+  }
+  @keyframes bounce-2 {
+    0%, 100% { height: 12px; }
+    50% { height: 5px; }
+  }
+  @keyframes bounce-3 {
+    0%, 100% { height: 7px; }
+    50% { height: 14px; }
+  }
+  @keyframes bounce-4 {
+    0%, 100% { height: 10px; }
+    50% { height: 4px; }
+  }
+
+  .music-player-widget.is-playing .bar-1 {
+    animation: bounce-1 0.8s ease-in-out infinite;
+  }
+  .music-player-widget.is-playing .bar-2 {
+    animation: bounce-2 0.7s ease-in-out infinite;
+  }
+  .music-player-widget.is-playing .bar-3 {
+    animation: bounce-3 0.9s ease-in-out infinite;
+  }
+  .music-player-widget.is-playing .bar-4 {
+    animation: bounce-4 0.6s ease-in-out infinite;
+  }
+
+  /* Responsive Positioning & Sizing */
+  @media (max-width: 640px) {
+    .music-player-widget {
+      left: 1rem;
+      bottom: 1rem;
+      width: 48px;
+      height: 48px;
+      padding: 5px;
+    }
+
+    .music-player-widget:hover,
+    .music-player-widget:focus-within,
+    .music-player-widget.is-expanded,
+    .music-player-widget.show-playlist {
+      width: 330px;
+      height: 48px;
+      padding: 5px 12px 5px 5px;
+      overflow: visible;
+    }
+
+    .vinyl-container {
+      width: 38px;
+      height: 38px;
+    }
+
+    .player-content {
+      width: 270px;
+      margin-left: 8px;
+    }
+
+    .music-player-widget:hover .player-content,
+    .music-player-widget:focus-within .player-content,
+    .music-player-widget.is-expanded .player-content,
+    .music-player-widget.show-playlist .player-content {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .player-content-left {
+      width: 150px;
+    }
+
+    .track-name {
+      font-size: 0.75rem;
+    }
+
+    .track-status {
+      font-size: 0.62rem;
+    }
+
+    .control-btn {
+      width: 24px;
+      height: 24px;
+    }
+
+    .control-btn svg {
+      width: 11px;
+      height: 11px;
+    }
+
+    #lofi-play-btn {
+      width: 28px;
+      height: 28px;
+    }
+
+    .visualizer {
+      width: 16px;
+      height: 12px;
+      gap: 2px;
+    }
+
+    .bar {
+      width: 1.8px;
+    }
+
+    .volume-slider-container {
+      display: none !important;
+    }
+  }
+</style>
+
+<style is:global>
+  /* Playlist Items - Styled globally to match dynamic JavaScript rendering */
+  .playlist-item {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-left: 3px solid transparent;
+  }
+
+  .playlist-item:hover {
+    background: rgba(44, 42, 41, 0.05);
+    padding-left: 20px;
+    border-left-color: rgba(var(--color-accent-rgb, 99, 102, 241), 0.4);
+  }
+
+  [data-theme="dark"] .playlist-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .playlist-item.active {
+    background: var(--color-accent-bg);
+    border-left-color: var(--color-accent);
+  }
+
+  .item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .item-index {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+    text-align: left;
+  }
+
+  .item-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    display: block;
+  }
+
+  .item-artist {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    display: block;
+  }
+
+  .playlist-item.active .item-name {
+    color: var(--color-accent);
+  }
+
+  .playlist-item.active .item-artist {
+    color: var(--color-accent);
+    opacity: 0.8;
+  }
+
+  .item-right {
+    flex-shrink: 0;
+  }
+
+  .playing-badge {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(var(--color-accent-rgb, 99, 102, 241), 0.2);
+    letter-spacing: 0.05em;
+    display: block;
+  }
+
+  .empty-list-state {
+    padding: 30px 20px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* Equalizer Animations */
+  .playing-equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 10px;
+    height: 10px;
+    margin: 0 auto;
+  }
+
+  .eq-bar {
+    width: 2px;
+    height: 2px;
+    background-color: var(--color-accent);
+    border-radius: 99px;
+  }
+
+  .music-player-widget.is-playing .eq-bar-1 {
+    animation: bounce-eq-1 0.8s ease-in-out infinite;
+  }
+
+  .music-player-widget.is-playing .eq-bar-2 {
+    animation: bounce-eq-2 0.7s ease-in-out infinite;
+  }
+
+  .music-player-widget.is-playing .eq-bar-3 {
+    animation: bounce-eq-3 0.9s ease-in-out infinite;
+  }
+
+  @keyframes bounce-eq-1 {
+    0%, 100% { height: 2px; }
+    50% { height: 10px; }
+  }
+
+  @keyframes bounce-eq-2 {
+    0%, 100% { height: 10px; }
+    50% { height: 4px; }
+  }
+
+  @keyframes bounce-eq-3 {
+    0%, 100% { height: 6px; }
+    50% { height: 10px; }
+  }
+</style>

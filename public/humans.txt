@@ -1,0 +1,18 @@
+/* TEAM */
+    Developer: 无渺
+    Contact: feedback@110228.xyz
+    GitHub: https://github.com/WumiaoTech228
+    Site: https://blog.110228.xyz
+
+/* SITE */
+    Engine: Astro 6
+    CMS: Keystatic
+    Hosting: Cloudflare Pages
+    Language: zh-CN
+    Last update: 2026-06-09
+
+/* THANKS */
+    Astro: https://astro.build
+    Keystatic: https://keystatic.com
+    Cloudflare: https://cloudflare.com
+    All open source dependencies

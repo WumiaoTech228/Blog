@@ -1,0 +1,772 @@
+---
+// CommandPalette.astro - Loaded dynamically from /posts.json
+---
+
+<div id="command-palette" class="command-palette-overlay" aria-hidden="true">
+  <div class="command-palette-modal" role="dialog" aria-modal="true" aria-label="命令行面板">
+    <div class="command-palette-header">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input 
+        type="text" 
+        id="command-palette-search" 
+        placeholder="搜索文章、栏目或修改主题色彩 (Ctrl+K)..." 
+        autocomplete="off" 
+        spellcheck="false"
+        aria-label="搜索文章、栏目或修改主题色彩"
+      />
+    </div>
+
+    <div class="command-palette-content">
+      {/* 快速导航部分 */}
+      <section class="content-section" id="section-nav">
+        <h3 class="section-title">快速导航</h3>
+        <div class="options-list">
+          <a href="/" class="selectable-item nav-item">
+            <span class="item-name">
+              <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              主页
+            </span>
+            <kbd class="shortcut">H</kbd>
+          </a>
+          <a href="/projects/" class="selectable-item nav-item">
+            <span class="item-name">
+              <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              项目
+            </span>
+            <kbd class="shortcut">P</kbd>
+          </a>
+          <a href="/guestbook/" class="selectable-item nav-item">
+            <span class="item-name">
+              <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              留言板
+            </span>
+            <kbd class="shortcut">G</kbd>
+          </a>
+          <a href="/archive/" class="selectable-item nav-item">
+            <span class="item-name">
+              <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              归档
+            </span>
+            <kbd class="shortcut">A</kbd>
+          </a>
+          <a href="/#about-section" class="selectable-item nav-item">
+            <span class="item-name">
+              <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              关于
+            </span>
+            <kbd class="shortcut">I</kbd>
+          </a>
+        </div>
+      </section>
+
+      {/* 主题预设部分 */}
+      <section class="content-section" id="section-theme">
+        <h3 class="section-title">主题预设</h3>
+        <div class="options-list grid-cols-2">
+          <button type="button" class="selectable-item theme-preset-btn" data-preset="ocean-blue" data-hue="200">
+            <span class="item-name">
+              <span class="color-dot" style="background: hsl(200, 35%, 65%);"></span>
+              海洋蓝 (Ocean Blue)
+            </span>
+            <kbd class="shortcut">1</kbd>
+          </button>
+          <button type="button" class="selectable-item theme-preset-btn" data-preset="mint-green" data-hue="155">
+            <span class="item-name">
+              <span class="color-dot" style="background: hsl(155, 35%, 65%);"></span>
+              薄荷绿 (Mint Green)
+            </span>
+            <kbd class="shortcut">2</kbd>
+          </button>
+          <button type="button" class="selectable-item theme-preset-btn" data-preset="sakura-pink" data-hue="340">
+            <span class="item-name">
+              <span class="color-dot" style="background: hsl(340, 35%, 65%);"></span>
+              樱花粉 (Sakura Pink)
+            </span>
+            <kbd class="shortcut">3</kbd>
+          </button>
+          <button type="button" class="selectable-item theme-preset-btn" data-preset="sunset-orange" data-hue="24">
+            <span class="item-name">
+              <span class="color-dot" style="background: hsl(24, 35%, 65%);"></span>
+              落日橙 (Sunset Orange)
+            </span>
+            <kbd class="shortcut">4</kbd>
+          </button>
+        </div>
+      </section>
+
+      {/* 搜索结果部分 */}
+      <section class="content-section hidden" id="section-results">
+        <h3 class="section-title">搜索结果</h3>
+        <div class="options-list" id="search-results-list">
+          {/* 动态填充 */}
+        </div>
+      </section>
+    </div>
+
+    <div class="command-palette-footer">
+      <div class="footer-tip"><kbd>↑↓</kbd> 移动</div>
+      <div class="footer-tip"><kbd>Enter</kbd> 选择</div>
+      <div class="footer-tip"><kbd>Esc</kbd> 关闭</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initCommandPalette() {
+    const overlay = document.getElementById('command-palette') as HTMLElement | null;
+    const searchInput = document.getElementById('command-palette-search') as HTMLInputElement | null;
+    const navSection = document.getElementById('section-nav') as HTMLElement | null;
+    const themeSection = document.getElementById('section-theme') as HTMLElement | null;
+    const resultsSection = document.getElementById('section-results') as HTMLElement | null;
+    const resultsList = document.getElementById('search-results-list') as HTMLElement | null;
+    const themeButtons = document.querySelectorAll('.theme-preset-btn');
+    
+    if (!overlay || !searchInput) return;
+
+    let posts: any[] = [];
+    let isDataLoaded = false;
+    let isOpen = false;
+    let activeIndex = -1;
+
+    async function loadPostsData() {
+      if (isDataLoaded) return;
+      try {
+        const res = await fetch('/posts.json');
+        posts = await res.json();
+        isDataLoaded = true;
+      } catch (err) {
+        console.error('Failed to load posts search data:', err);
+      }
+    }
+
+    function openPalette() {
+      isOpen = true;
+      overlay?.setAttribute('aria-hidden', 'false');
+      overlay?.classList.add('is-visible');
+      document.body.style.overflow = 'hidden';
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      loadPostsData().then(() => {
+        updateUI();
+      });
+    }
+
+    function closePalette() {
+      isOpen = false;
+      overlay?.setAttribute('aria-hidden', 'true');
+      overlay?.classList.remove('is-visible');
+      document.body.style.overflow = '';
+      searchInput?.blur();
+    }
+
+    function togglePalette() {
+      if (isOpen) {
+        closePalette();
+      } else {
+        openPalette();
+      }
+    }
+
+    // 绑定快捷键 Ctrl+K / Cmd+K / Esc 及其他控制
+    const handleGlobalKeydown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        togglePalette();
+      }
+
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closePalette();
+      }
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        navigateItems(1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateItems(-1);
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        selectActiveItem();
+      }
+
+      // 如果搜索框为空且未获得输入焦点，支持数字键或单字母直达
+      if (searchInput && searchInput.value === '' && document.activeElement !== searchInput) {
+        const key = e.key.toLowerCase();
+        // 排除组合键，防止误触
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+          if (key === 'h') {
+            e.preventDefault();
+            window.location.href = '/';
+            closePalette();
+          } else if (key === 'p') {
+            e.preventDefault();
+            window.location.href = '/projects/';
+            closePalette();
+          } else if (key === 'g') {
+            e.preventDefault();
+            window.location.href = '/guestbook/';
+            closePalette();
+          } else if (key === 'a') {
+            e.preventDefault();
+            window.location.href = '/archive/';
+            closePalette();
+          } else if (key === 'i') {
+            e.preventDefault();
+            window.location.href = '/#about-section';
+            closePalette();
+          } else if (key === '1') {
+            e.preventDefault();
+            setHue('200');
+            closePalette();
+          } else if (key === '2') {
+            e.preventDefault();
+            setHue('155');
+            closePalette();
+          } else if (key === '3') {
+            e.preventDefault();
+            setHue('340');
+            closePalette();
+          } else if (key === '4') {
+            e.preventDefault();
+            setHue('24');
+            closePalette();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeydown);
+
+    // 监听导航按钮或点击触发的全局面板切换自定义事件
+    const handleToggleEvent = () => {
+      togglePalette();
+    };
+    document.addEventListener('toggle-command-palette', handleToggleEvent);
+
+    // 点击蒙版关闭
+    const handleMaskClick = (e: MouseEvent) => {
+      if (e.target === overlay) {
+        closePalette();
+      }
+    };
+    overlay.addEventListener('click', handleMaskClick);
+
+    // 绑定主题色按钮点击
+    const handleThemeBtnClick = (btn: HTMLElement) => {
+      const hue = btn.getAttribute('data-hue');
+      if (hue) {
+        setHue(hue);
+        closePalette();
+
+        // 触发对应主题色相的五彩纸屑粒子效果
+        if (window.triggerConfetti) {
+          const rect = btn.getBoundingClientRect();
+          const h = parseInt(hue, 10);
+          const themeColors = [
+            `hsl(${h}, 85%, 60%)`,
+            `hsl(${h - 15}, 80%, 55%)`,
+            `hsl(${h + 15}, 90%, 65%)`,
+            `hsl(${h}, 70%, 50%)`
+          ];
+          window.triggerConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2, themeColors);
+        }
+      }
+    };
+
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => handleThemeBtnClick(btn as HTMLElement));
+    });
+
+    // 搜索过滤事件
+    searchInput.addEventListener('input', updateUI);
+
+    function setHue(hueVal: string) {
+      document.documentElement.style.setProperty('--hue', hueVal);
+      localStorage.setItem('hue', hueVal);
+      
+      const slider = document.getElementById('hue-slider') as HTMLInputElement | null;
+      if (slider) {
+        slider.value = hueVal;
+      }
+    }
+
+    function getVisibleItems(): HTMLElement[] {
+      return Array.from(overlay!.querySelectorAll('.selectable-item:not(.hidden)')) as HTMLElement[];
+    }
+
+    function navigateItems(direction: number) {
+      const items = getVisibleItems();
+      if (items.length === 0) return;
+
+      if (activeIndex >= 0 && activeIndex < items.length) {
+        items[activeIndex].classList.remove('active');
+      }
+
+      activeIndex += direction;
+
+      if (activeIndex >= items.length) {
+        activeIndex = 0;
+      } else if (activeIndex < 0) {
+        activeIndex = items.length - 1;
+      }
+
+      const activeItem = items[activeIndex];
+      activeItem.classList.add('active');
+      activeItem.scrollIntoView({ block: 'nearest' });
+    }
+
+    function selectActiveItem() {
+      const items = getVisibleItems();
+      if (activeIndex >= 0 && activeIndex < items.length) {
+        const activeItem = items[activeIndex];
+        if (activeItem.tagName.toLowerCase() === 'a') {
+          (activeItem as HTMLAnchorElement).click();
+        } else {
+          activeItem.click();
+        }
+      }
+    }
+
+    function updateUI() {
+      const query = searchInput?.value.trim().toLowerCase() || '';
+      activeIndex = -1;
+      
+      if (query === '') {
+        navSection?.classList.remove('hidden');
+        themeSection?.classList.remove('hidden');
+        resultsSection?.classList.add('hidden');
+        if (resultsList) resultsList.innerHTML = '';
+      } else {
+        navSection?.classList.add('hidden');
+        themeSection?.classList.add('hidden');
+        resultsSection?.classList.remove('hidden');
+        
+        const matches = posts.filter((post: any) => {
+          return (
+            post.title.toLowerCase().includes(query) ||
+            post.description.toLowerCase().includes(query) ||
+            post.tags.some((tag: string) => tag.toLowerCase().includes(query))
+          );
+        });
+
+        renderResults(matches);
+      }
+
+      const items = getVisibleItems();
+      items.forEach(item => item.classList.remove('active'));
+      
+      if (items.length > 0) {
+        activeIndex = 0;
+        items[0].classList.add('active');
+      }
+    }
+
+    function renderResults(matches: any[]) {
+      if (!resultsList) return;
+      
+      if (matches.length === 0) {
+        resultsList.innerHTML = `
+          <div class="no-results">
+            没有找到匹配的博客文章
+          </div>
+        `;
+        return;
+      }
+
+      resultsList.innerHTML = matches.map(post => {
+        const tagsHtml = post.tags.map((tag: string) => `
+          <span class="search-result-tag">#${tag}</span>
+        `).join('');
+
+        return `
+          <a href="/blog/${post.slug}/" class="selectable-item search-result-item">
+            <div class="search-result-title-row">
+              <span class="search-result-title">${post.title}</span>
+              <span class="search-result-date">${post.date}</span>
+            </div>
+            <span class="search-result-desc">${post.description}</span>
+            <div class="search-result-meta">
+              ${tagsHtml}
+            </div>
+          </a>
+        `;
+      }).join('');
+
+      // 给动态生成的 dynamic links 重新加上 hover 类以确保跟随 custom-cursor 的交互样式
+      const dotEl = document.getElementById('custom-cursor-dot');
+      const ringEl = document.getElementById('custom-cursor-ring');
+      if (dotEl || ringEl) {
+        const items = resultsList.querySelectorAll('.search-result-item');
+        items.forEach((el) => {
+          el.addEventListener('mouseenter', () => {
+            dotEl?.classList.add('hovered');
+            ringEl?.classList.add('hovered');
+          });
+          el.addEventListener('mouseleave', () => {
+            dotEl?.classList.remove('hovered');
+            ringEl?.classList.remove('hovered');
+          });
+        });
+      }
+    }
+
+    // 返回清理监听器的函数以防 page-load 重复调用时挂载过多事件
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeydown);
+      document.removeEventListener('toggle-command-palette', handleToggleEvent);
+      overlay.removeEventListener('click', handleMaskClick);
+    };
+  }
+
+  let cleanup: (() => void) | undefined | null = null;
+  document.addEventListener('astro:page-load', () => {
+    if (cleanup) cleanup();
+    cleanup = initCommandPalette();
+  });
+</script>
+
+<style is:global>
+  /* 蒙版层样式 */
+  .command-palette-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12vh 1.5rem 2rem 1.5rem;
+    background-color: rgba(250, 248, 245, 0.45);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: hidden;
+  }
+
+  .command-palette-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  [data-theme="dark"] .command-palette-overlay {
+    background-color: rgba(13, 13, 13, 0.55);
+  }
+
+
+
+  /* 模态框主体 */
+  .command-palette-modal {
+    width: 100%;
+    max-width: 600px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-12px) scale(0.98);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .command-palette-overlay.is-visible .command-palette-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  /* 搜索头部 */
+  .command-palette-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  #command-palette-search {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  #command-palette-search::placeholder {
+    color: var(--text-muted);
+    opacity: 0.65;
+  }
+
+  /* 内容区 */
+  .command-palette-content {
+    max-height: 45vh;
+    overflow-y: auto;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .content-section.hidden {
+    display: none;
+  }
+
+  .section-title {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .grid-cols-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  @media (max-width: 540px) {
+    .grid-cols-2 {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+  }
+
+  /* 选项元素样式 */
+  .selectable-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    text-decoration: none;
+    width: 100%;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .selectable-item:hover,
+  .selectable-item.active {
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    outline: none;
+  }
+
+  .selectable-item.active .shortcut {
+    background: var(--color-accent);
+    color: var(--bg-color);
+    border-color: var(--color-accent);
+  }
+
+  .item-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .item-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+  }
+
+  .selectable-item:hover .item-icon,
+  .selectable-item.active .item-icon {
+    color: var(--color-accent);
+  }
+
+  .color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  /* 快捷键徽标 */
+  .shortcut {
+    font-family: 'SF Mono', Consolas, Monaco, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.15rem 0.4rem;
+    background: rgba(44, 42, 41, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-muted);
+    box-shadow: 0 1px 0 var(--border-color);
+    transition: all 0.2s ease;
+    line-height: 1.2;
+  }
+
+  [data-theme="dark"] .shortcut {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+
+
+  /* 搜索结果具体样式 */
+  .search-result-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .search-result-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .search-result-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .search-result-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .search-result-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .search-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+  }
+
+  .search-result-tag {
+    background: var(--color-accent-bg);
+    color: var(--color-accent);
+    padding: 0.08rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 500;
+  }
+
+  .no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* 底部面板提示 */
+  .command-palette-footer {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.8rem 1.4rem;
+    background: rgba(44, 42, 41, 0.015);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  [data-theme="dark"] .command-palette-footer {
+    background: rgba(255, 255, 255, 0.015);
+  }
+
+
+
+  .footer-tip {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .footer-tip kbd {
+    font-family: inherit;
+    font-size: 0.72rem;
+    background: rgba(44, 42, 41, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.1rem 0.3rem;
+    box-shadow: 0 1px 0 var(--border-color);
+  }
+
+  [data-theme="dark"] .footer-tip kbd {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+
+</style>

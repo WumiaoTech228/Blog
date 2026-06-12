@@ -1,0 +1,801 @@
+---
+
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: '/', label: '主页', active: pathname === '/' },
+  { href: '/projects/', label: '项目', active: pathname.startsWith('/projects') },
+  { href: '/archive/', label: '归档', active: pathname.startsWith('/archive') || pathname.startsWith('/tags') },
+  { href: '/guestbook/', label: '互动', active: pathname.startsWith('/guestbook') },
+  { href: '/#about-section', label: '关于', active: false },
+];
+---
+<header class="main-header">
+  <div class="header-container">
+    <div class="header-left">
+      <div class="glass-pill logo-pill">
+        <a href="/" class="logo" aria-label="无渺の小站 首页">
+          <img src="/images/avatar.webp" alt="无渺" class="logo-avatar" />
+          <span>无渺の小站</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 中间部分 (导航菜单) -->
+    <div class="header-center">
+      <nav class="glass-pill nav-pill" aria-label="主导航">
+        <div class="nav-links">
+          {navItems.map(item => (
+            <a href={item.href} class:list={{ active: item.active }} aria-current={item.active ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </nav>
+    </div>
+
+    <!-- 右侧部分 (功能按钮) -->
+    <div class="header-right">
+      <!-- 搜索按钮 -->
+      <div class="glass-pill search-pill" title="全局搜索 (Ctrl+K)">
+        <button id="search-toggle" class="search-toggle" aria-label="全局搜索">
+          <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 色彩定制 -->
+      <div class="glass-pill color-pill" title="自定义主题色">
+        <button id="color-toggle" class="color-toggle" aria-label="自定义主题色">
+          <svg class="palette-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35338 19.5 5.5 20.0885 5.5 20.5C5.5 21.3284 6.17157 22 7 22H12Z" />
+            <circle cx="7.5" cy="10.5" r="1.5" fill="currentColor" />
+            <circle cx="11.5" cy="7.5" r="1.5" fill="currentColor" />
+            <circle cx="16.5" cy="9.5" r="1.5" fill="currentColor" />
+            <circle cx="15.5" cy="14.5" r="1.5" fill="currentColor" />
+          </svg>
+        </button>
+        <div class="color-dropdown" id="color-dropdown" aria-hidden="true">
+          <div class="color-dropdown-inner">
+            <div class="color-dropdown-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;">
+              <span class="dropdown-label">调节主题色相</span>
+              <span class="color-preview-dot" style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--color-accent); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 0 4px var(--color-accent); display: inline-block;"></span>
+            </div>
+            <input type="range" id="hue-slider" min="0" max="360" value="155" class="hue-slider" aria-label="主题色相" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 主题切换 -->
+      <div class="glass-pill theme-pill">
+        <button id="theme-toggle" class="theme-toggle" aria-label="切换主题" title="切换主题">
+          <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 移动端菜单按钮 -->
+      <div class="glass-pill menu-pill">
+        <button id="mobile-menu-toggle" class="menu-toggle" aria-label="展开菜单" aria-expanded="false">
+          <svg class="menu-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg class="menu-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 移动端下拉菜单面板 -->
+<nav class="mobile-menu-panel" id="mobile-menu-panel" aria-label="移动端导航" aria-hidden="true">
+  <div class="mobile-menu-inner">
+    {navItems.map(item => (
+      <a href={item.href} class:list={["mobile-menu-link", { active: item.active }]} aria-current={item.active ? 'page' : undefined}>
+        {item.label}
+      </a>
+    ))}
+    
+    <div class="mobile-color-picker">
+      <div class="mobile-color-picker-title" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg class="palette-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.35338 19.5 5.5 20.0885 5.5 20.5C5.5 21.3284 6.17157 22 7 22H12Z" />
+            <circle cx="7.5" cy="10.5" r="1.5" fill="currentColor" />
+            <circle cx="11.5" cy="7.5" r="1.5" fill="currentColor" />
+            <circle cx="16.5" cy="9.5" r="1.5" fill="currentColor" />
+            <circle cx="15.5" cy="14.5" r="1.5" fill="currentColor" />
+          </svg>
+          <span>自定义主题色</span>
+        </div>
+        <span class="color-preview-dot" style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--color-accent); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 0 4px var(--color-accent); display: inline-block;"></span>
+      </div>
+      <input type="range" id="mobile-hue-slider" min="0" max="360" value="155" class="hue-slider mobile-hue-slider" aria-label="移动端主题色相" />
+    </div>
+  </div>
+</nav>
+
+<script>
+  function initHeader() {
+    const cleanups: (() => void)[] = [];
+
+    // --- 1. Theme Toggle ---
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      const el = themeBtn;
+      function getEffectiveTheme(): string {
+        const theme = document.documentElement.dataset.theme;
+        if (theme === 'dark' || theme === 'light') return theme;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      function setIcon() {
+        const effectiveTheme = getEffectiveTheme();
+        el.classList.toggle('is-dark', effectiveTheme === 'dark');
+        if (effectiveTheme === 'dark') {
+          el.setAttribute('aria-label', '切换到亮色模式');
+        } else {
+          el.setAttribute('aria-label', '切换到暗色模式');
+        }
+      }
+
+      setIcon();
+
+      const handleThemeClick = function () {
+        const currentEffective = getEffectiveTheme();
+        const next = currentEffective === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+        setIcon();
+      };
+
+      themeBtn.addEventListener('click', handleThemeClick);
+      cleanups.push(() => themeBtn.removeEventListener('click', handleThemeClick));
+    }
+
+    // --- 2. Color Dropdown and Hue Slider ---
+    const colorBtn = document.getElementById('color-toggle');
+    const colorDropdown = document.getElementById('color-dropdown');
+    const slider = document.getElementById('hue-slider') as HTMLInputElement | null;
+    const mobileSlider = document.getElementById('mobile-hue-slider') as HTMLInputElement | null;
+
+    if (colorBtn && colorDropdown) {
+      const toggleDropdown = (e: MouseEvent) => {
+        e.stopPropagation();
+        const isOpen = colorDropdown.classList.toggle('is-open');
+        colorDropdown.setAttribute('aria-hidden', String(!isOpen));
+      };
+
+      const closeDropdown = () => {
+        colorDropdown.classList.remove('is-open');
+        colorDropdown.setAttribute('aria-hidden', 'true');
+      };
+
+      const handleDocClickForDropdown = (e: MouseEvent) => {
+        if (!colorDropdown.contains(e.target as Node) && !colorBtn.contains(e.target as Node)) {
+          closeDropdown();
+        }
+      };
+
+      colorBtn.addEventListener('click', toggleDropdown);
+      document.addEventListener('click', handleDocClickForDropdown);
+
+      cleanups.push(() => {
+        colorBtn.removeEventListener('click', toggleDropdown);
+        document.removeEventListener('click', handleDocClickForDropdown);
+      });
+    }
+
+    const savedHue = localStorage.getItem('hue') || '155';
+    if (slider) slider.value = savedHue;
+    if (mobileSlider) mobileSlider.value = savedHue;
+
+    function updateHue(hueVal: string) {
+      document.documentElement.style.setProperty('--hue', hueVal);
+      localStorage.setItem('hue', hueVal);
+      if (slider) slider.value = hueVal;
+      if (mobileSlider) mobileSlider.value = hueVal;
+    }
+
+    const handleSliderInput = function () {
+      if (slider) updateHue(slider.value);
+    };
+    const handleMobileSliderInput = function () {
+      if (mobileSlider) updateHue(mobileSlider.value);
+    };
+
+    if (slider) {
+      slider.addEventListener('input', handleSliderInput);
+      cleanups.push(() => slider.removeEventListener('input', handleSliderInput));
+    }
+    if (mobileSlider) {
+      mobileSlider.addEventListener('input', handleMobileSliderInput);
+      cleanups.push(() => mobileSlider.removeEventListener('input', handleMobileSliderInput));
+    }
+
+    // --- 3. Mobile Menu ---
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+    const panel = document.getElementById('mobile-menu-panel');
+    if (toggleBtn && panel) {
+      const handleToggleClick = function() {
+        const isOpen = panel.classList.toggle('is-open');
+        toggleBtn.setAttribute('aria-expanded', String(isOpen));
+        toggleBtn.classList.toggle('is-active', isOpen);
+        panel.setAttribute('aria-hidden', String(!isOpen));
+      };
+
+      toggleBtn.addEventListener('click', handleToggleClick);
+      cleanups.push(() => toggleBtn.removeEventListener('click', handleToggleClick));
+
+      // 点击菜单内链接后自动关闭
+      const mobileLinks = panel.querySelectorAll('.mobile-menu-link');
+      const handleLinkClick = function() {
+        panel.classList.remove('is-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.classList.remove('is-active');
+        panel.setAttribute('aria-hidden', 'true');
+      };
+      mobileLinks.forEach(function(link) {
+        link.addEventListener('click', handleLinkClick);
+        cleanups.push(() => link.removeEventListener('click', handleLinkClick));
+      });
+
+      // 点击外部关闭
+      const handleDocClickForMobile = function(e: MouseEvent) {
+        if (!panel.contains(e.target as Node) && !toggleBtn.contains(e.target as Node)) {
+          panel.classList.remove('is-open');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.classList.remove('is-active');
+        }
+      };
+      document.addEventListener('click', handleDocClickForMobile);
+      cleanups.push(() => document.removeEventListener('click', handleDocClickForMobile));
+    }
+
+    // --- 4. Search Button ---
+    const searchBtn = document.getElementById('search-toggle');
+    if (searchBtn) {
+      const handleSearchClick = () => {
+        document.dispatchEvent(new CustomEvent('toggle-command-palette'));
+      };
+      searchBtn.addEventListener('click', handleSearchClick);
+      cleanups.push(() => searchBtn.removeEventListener('click', handleSearchClick));
+    }
+
+    return () => {
+      cleanups.forEach(c => c());
+    };
+  }
+
+  let cleanupHeader: (() => void) | null = null;
+  document.addEventListener('astro:page-load', function() {
+    if (cleanupHeader) cleanupHeader();
+    cleanupHeader = initHeader();
+  });
+</script>
+
+<style>
+  .main-header {
+    position: fixed;
+    top: 1.5rem;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 0 2rem;
+    z-index: 1000;
+    pointer-events: none; /* 让点击穿透胶囊之间的空白区域 */
+    display: flex;
+    justify-content: center;
+  }
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    pointer-events: auto; /* 允许点击胶囊组件 */
+  }
+  .header-left,
+  .header-center,
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .header-left {
+    flex: 1 1 0%;
+    justify-content: flex-start;
+  }
+  .header-center {
+    flex: 0 0 auto;
+    justify-content: center;
+  }
+  .header-right {
+    flex: 1 1 0%;
+    justify-content: flex-end;
+  }
+  .glass-pill {
+    background: var(--card-bg);
+    /* Fallback: always apply blur+saturate */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 99px;
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+      var(--shadow-sm);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+  }
+  .glass-pill:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+  
+  [data-theme="dark"] .glass-pill {
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+      var(--shadow-sm);
+  }
+  [data-theme="dark"] .glass-pill:hover {
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+      var(--shadow-md);
+  }
+  
+
+
+  .logo-pill {
+    padding: 0.5rem 1.2rem;
+    flex-shrink: 0;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+  .logo-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+  }
+
+  .nav-pill {
+    padding: 0.4rem 0.5rem;
+    flex-shrink: 0;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nav-links a {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 0.4rem 1.1rem;
+    border-radius: 99px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    white-space: nowrap;
+  }
+  .nav-links a:hover {
+    color: var(--text-main);
+    background-color: rgba(44, 42, 41, 0.04);
+  }
+  [data-theme="dark"] .nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+
+  .nav-links a.active {
+    color: var(--color-accent);
+    background-color: var(--color-accent-bg);
+    font-weight: 600;
+  }
+
+  .theme-pill {
+    padding: 0.3rem;
+    flex-shrink: 0;
+  }
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    padding: 0.45rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover {
+    color: var(--text-main);
+    background-color: rgba(44, 42, 41, 0.04);
+  }
+  [data-theme="dark"] .theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+
+  .theme-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .theme-icon-dark { display: none; }
+  .theme-toggle.is-dark .theme-icon-light { display: none; }
+  .theme-toggle.is-dark .theme-icon-dark { display: block; }
+
+  .search-pill {
+    padding: 0.3rem;
+    flex-shrink: 0;
+  }
+  .search-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    padding: 0.45rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+  }
+  .search-toggle:hover {
+    color: var(--text-main);
+    background-color: rgba(44, 42, 41, 0.04);
+  }
+  [data-theme="dark"] .search-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .search-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .color-pill {
+    padding: 0.3rem;
+  }
+  .color-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.45rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .palette-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+  }
+  .color-pill:hover .palette-icon {
+    color: var(--color-accent);
+  }
+  .color-pill {
+    padding: 0.3rem;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .color-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    padding: 0.45rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease, background-color 0.2s ease;
+    flex-shrink: 0;
+  }
+  .color-toggle:hover {
+    color: var(--text-main);
+    background-color: rgba(44, 42, 41, 0.04);
+  }
+  [data-theme="dark"] .color-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+  .color-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .palette-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Color Dropdown styles */
+  .color-dropdown {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    width: 170px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+      var(--shadow-md);
+    /* Fallback: always apply blur+saturate */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 0.75rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                visibility 0.25s;
+    z-index: 1010;
+  }
+  .color-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.75);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: -1;
+  }
+  [data-theme="dark"] .color-dropdown::before {
+    background: rgba(30, 30, 30, 0.95);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-left-color: rgba(255, 255, 255, 0.15);
+  }
+  .color-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+  .color-dropdown-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .dropdown-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .hue-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 99px;
+    background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+    outline: none;
+    cursor: pointer;
+    opacity: 1;
+  }
+  [data-theme="dark"] .hue-slider {
+    background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+  }
+  .hue-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--color-accent);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform 0.1s ease;
+  }
+  .hue-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  /* 移动端菜单按钮 - 默认隐藏 */
+  .menu-pill {
+    display: none;
+    padding: 0.3rem;
+    flex-shrink: 0;
+  }
+  .menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0.45rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-radius: 50%;
+    transition: color 0.2s ease;
+  }
+  .menu-toggle:hover {
+    color: var(--text-main);
+  }
+  .menu-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .menu-icon-close { display: none; }
+  .menu-toggle.is-active .menu-icon-open { display: none; }
+  .menu-toggle.is-active .menu-icon-close { display: block; }
+
+  /* 移动端下拉面板 */
+  .mobile-menu-panel {
+    display: none;
+  }
+
+
+  /* 响应式收缩 */
+  @media (max-width: 960px) {
+    .main-header {
+      top: 1rem;
+      width: 100%;
+      padding: 0 1rem;
+    }
+    .header-container {
+      width: 100%;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+    .header-left {
+      flex: 0 1 auto;
+    }
+    .header-center {
+      display: none;
+    }
+    .header-right {
+      flex: 0 1 auto;
+      gap: 0.4rem;
+    }
+    .logo-pill {
+      padding: 0.5rem 1rem;
+    }
+    .logo {
+      font-size: 1.1rem;
+    }
+    /* 移动端：隐藏导航胶囊，显示汉堡按钮 */
+    .nav-pill {
+      display: none;
+    }
+    .menu-pill {
+      display: flex;
+    }
+    /* 移动端下拉菜单面板 */
+    .mobile-menu-panel {
+      display: block;
+      position: fixed;
+      top: 4.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      width: calc(100% - 2rem);
+      max-width: 400px;
+      background: var(--card-bg);
+      /* Fallback: always apply blur+saturate */
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+        0 16px 48px rgba(44, 42, 41, 0.12);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-menu-panel.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .mobile-menu-inner {
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem;
+    }
+    .mobile-menu-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+      border-radius: var(--radius-sm);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .mobile-menu-link.active {
+      background: var(--color-accent-bg);
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+    .mobile-menu-link:hover {
+      background: var(--color-accent-bg);
+      color: var(--color-accent);
+    }
+    
+    /* 移动端色彩定制器 */
+    .mobile-color-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid rgba(44, 42, 41, 0.08);
+      margin-top: 0.5rem;
+    }
+    [data-theme="dark"] .mobile-color-picker {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .mobile-color-picker-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .mobile-hue-slider {
+      width: 100% !important;
+      opacity: 1 !important;
+      height: 8px;
+    }
+    /* 移动端隐藏桌面端色彩定制器以节省空间 */
+    .color-pill {
+      display: none;
+    }
+  }
+  @media (max-width: 360px) {
+    .nav-links {
+      gap: 0.2rem;
+    }
+    .nav-links a {
+      padding: 0.35rem 0.5rem;
+    }
+  }
+</style>

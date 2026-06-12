@@ -1,0 +1,7 @@
+﻿# Security contact
+# https://github.com/WumiaoTech228
+
+Contact: mailto:feedback@110228.xyz
+Preferred-Languages: zh, en
+Canonical: https://blog.110228.xyz/.well-known/security.txt
+Policy: https://github.com/WumiaoTech228/Blog/security/policy

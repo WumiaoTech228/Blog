@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>无渺 Blog</ShortName>
+  <Description>搜索 无渺 博客文章</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Language>zh-CN</Language>
+  <Url type="text/html" method="get" template="https://blog.110228.xyz/?q={searchTerms}" />
+</OpenSearchDescription>

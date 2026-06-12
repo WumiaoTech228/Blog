@@ -1,0 +1,1060 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { getCollection } from 'astro:content';
+import { SITE } from '../config';
+import { getPostReadingTime, getPostSlug, getPublishedPosts } from '../utils/posts';
+import type { BlogPost } from '../utils/posts';
+
+// 获取博客文章列表，按日期倒序排列，排除草稿
+let posts: BlogPost[] = [];
+try {
+  const allPosts = await getCollection('blog');
+  posts = getPublishedPosts(allPosts);
+} catch (e) {
+  posts = [];
+}
+---
+
+<Layout title="无渺の个人小站" description={SITE.description}>
+  <div class="index-layout container">
+    <!-- 首屏 Hero Area -->
+    <section class="hero-fold">
+      <div class="hero-grid">
+        <!-- 左侧：个人详细介绍 -->
+        <div class="hero-intro-area">
+          <ScrollReveal animation="fade-up" delay={0}>
+            <div class="greeting-container">
+              <span class="active-status-dot" title="博主目前在线折腾中" aria-hidden="true"></span>
+              <span id="dynamic-greeting" class="dynamic-greeting-text">你好，</span>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={80}>
+            <h1 class="intro-title"><span class="highlight">这里是无渺の小站，祝你今天开心 (つ´ω`)つ</span></h1>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={160}>
+            <p class="intro-tagline">学生开发者 / Vibe Coder</p>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={240}>
+            <p class="intro-bio" id="typed-bio">
+              记录日常代码、折腾笔记与生活观察。相信直觉，享受纯粹的写码快乐。正在做的开源项目有本站和 LepoProxy。
+            </p>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={320}>
+            <div class="tech-stack-row">
+              <span class="tech-pill">Astro</span>
+              <span class="tech-pill">TypeScript</span>
+              <span class="tech-pill">Go</span>
+              <span class="tech-pill">React</span>
+              <span class="tech-pill">Cloudflare</span>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal animation="fade-up" delay={400}>
+            <div class="intro-links">
+              <a href={SITE.github} target="_blank" rel="noopener noreferrer" class="btn-primary" title="GitHub">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="link-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                GitHub
+              </a>
+              <a href={`mailto:${SITE.email}`} class="btn-outline" title="Email">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="link-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Email 联系我
+              </a>
+            </div>
+          </ScrollReveal>
+        </div>
+
+        <!-- 右侧：精选项目展示 -->
+        <ScrollReveal animation="fade-up" delay={200}>
+          <div class="hero-projects-area">
+            <div class="glass-card projects-card">
+              <div class="projects-aura"></div>
+              <div class="projects-card-inner">
+                <h3 class="projects-card-title">最近在做</h3>
+                <div class="projects-list-vertical">
+                  <div class="project-card-item">
+                    <div class="proj-header">
+                      <h4 class="proj-title">
+                        <a href="/projects/">Blog</a>
+                      </h4>
+                      <span class="proj-status active">已上线</span>
+                    </div>
+                    <p class="proj-desc">基于 Astro & Keystatic 构建的无服务器个人博客，本站的底层驱动。</p>
+                    <div class="proj-meta-tags">
+                      <span class="badge">Astro</span>
+                      <span class="badge">Keystatic</span>
+                    </div>
+                  </div>
+
+                  <div class="project-card-item">
+                    <div class="proj-header">
+                      <h4 class="proj-title">
+                        <a href="/projects/">LepoProxy</a>
+                      </h4>
+                      <span class="proj-status coding">开发中</span>
+                    </div>
+                    <p class="proj-desc">基于 Tauri v2 + Sing-Box 内核构筑的下一代全协议桌面代理客户端。</p>
+                    <div class="proj-meta-tags">
+                      <span class="badge">Tauri v2</span>
+                      <span class="badge">Rust</span>
+                      <span class="badge">Sing-Box</span>
+                    </div>
+                  </div>
+
+                  <div class="project-card-item">
+                    <div class="proj-header">
+                      <h4 class="proj-title">
+                        <a href="/projects/">GlimOfficeInstaller</a>
+                      </h4>
+                      <span class="proj-status coding">开发中</span>
+                    </div>
+                    <p class="proj-desc">便携、轻量化、原版化的微软 Office 安装与激活部署工具。</p>
+                    <div class="proj-meta-tags">
+                      <span class="badge">C#</span>
+                      <span class="badge">.NET</span>
+                      <span class="badge">Ohook</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </div>
+
+      <!-- 向下滑动指示 -->
+      <div class="scroll-indicator">
+        <a href="#blog-section" class="scroll-link" aria-label="向下滑动查看文章">
+          <span class="scroll-text">最新文章</span>
+          <svg class="scroll-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- 新增：关于 & 装备库版块 -->
+    <section id="about-section" class="about-fold">
+      <div class="section-header">
+        <h2 class="section-title">关于我 & 装备库</h2>
+      </div>
+
+      <div class="about-hero-grid">
+        <!-- 左侧列：关于我与本站介绍 + 软件利器 -->
+        <div class="about-bio-panel">
+          <ScrollReveal animation="fade-up" delay={0}>
+            <div class="glass-card about-left-card">
+              <div class="about-section-block">
+                <h3 class="card-subtitle-small">关于我</h3>
+                <p class="bio-text">
+                  你好，我是 <strong>无渺</strong>，一名学生开发者。这里记录我的开发过程、工具折腾和一些持续更新的想法。我喜欢折腾各种有趣的技术，也会把踩坑过程 and 复盘记录下来。本站更像一份长期维护的开发日志，相信直觉，享受纯粹的写码快乐。
+                </p>
+              </div>
+              
+              <div class="about-section-divider"></div>
+              
+              <div class="about-section-block">
+                <h3 class="card-subtitle-small">关于本站</h3>
+                <p class="bio-text">
+                  本站是一个 100% 静态生成的无服务器网站。采用 <strong>Astro</strong> 编译静态页面，速度极快；使用 <strong>Keystatic</strong> 充当 Git-backed CMS 文本管理面板；全量部署于 <strong>Cloudflare Pages</strong> 全球边缘网络，享受零服务器开销与高安全性。
+                </p>
+              </div>
+
+              <div class="about-section-divider"></div>
+
+              <div class="about-section-block">
+                <h3 class="card-subtitle-small">联络与联机</h3>
+                <div class="contact-grid">
+                  <!-- QQ -->
+                  <div class="contact-item" title="QQ: 1419956461">
+                    <span class="contact-icon-wrapper qq-brand">
+                      <svg class="contact-svg" width="17" height="17" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <div class="contact-info">
+                      <span class="contact-label">QQ</span>
+                      <span class="contact-value">1419956461</span>
+                    </div>
+                  </div>
+
+                  <!-- B站 -->
+                  <a href="https://space.bilibili.com/3494377160706567" target="_blank" rel="noopener noreferrer" class="contact-item linkable" title="访问我的 B站 个人空间">
+                    <span class="contact-icon-wrapper bili-brand">
+                      <svg class="contact-svg" width="17" height="17" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <div class="contact-info">
+                      <span class="contact-label">B站</span>
+                      <span class="contact-value">Bilibili 空间</span>
+                    </div>
+                  </a>
+
+                  <!-- 鸣潮 -->
+                  <div class="contact-item" title="鸣潮 UID: 801478798">
+                    <span class="contact-icon-wrapper mc-brand">
+                      <svg class="contact-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.5 0 2.5 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.5 0 2.5 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.5 0 2.5 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                      </svg>
+                    </span>
+                    <div class="contact-info">
+                      <span class="contact-label">鸣潮 UID (港澳台)</span>
+                      <span class="contact-value">801478798</span>
+                    </div>
+                  </div>
+
+                  <!-- 崩坏：星穹铁道 -->
+                  <div class="contact-item" title="星穹铁道 UID: 901549277">
+                    <span class="contact-icon-wrapper sr-brand">
+                      <svg class="contact-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                      </svg>
+                    </span>
+                    <div class="contact-info">
+                      <span class="contact-label">星铁 UID (港澳台)</span>
+                      <span class="contact-value">901549277</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <!-- 软件利器 -->
+          <ScrollReveal animation="fade-up" delay={150}>
+            <div class="glass-card about-toolbox-card">
+              <div class="about-section-block">
+                <div class="toolbox-header-row">
+                  <span class="toolbox-icon">
+                    <svg class="toolbox-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                  </span>
+                  <h4>软件利器</h4>
+                </div>
+                <div class="toolbox-tags-row">
+                  <span class="badge">Codex</span>
+                  <span class="badge">Antigravity</span>
+                  <span class="badge">Trae</span>
+                  <span class="badge">Obsidian</span>
+                  <span class="badge">GitHub</span>
+                  <span class="badge">Cloudflare</span>
+                  <span class="badge">Keystatic</span>
+                </div>
+                <p class="toolbox-text-small">Codex、Antigravity 和 Trae 是不可或缺 of 开发与 AI 协作利器；使用 Obsidian 进行知识库管理；依托 Cloudflare 负责网络托管加速。</p>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+
+        <!-- 右侧列：开发栈 + 桌面环境 -->
+        <div class="about-toolbox-panel">
+          <!-- 开发栈 -->
+          <ScrollReveal animation="fade-up" delay={100}>
+            <div class="glass-card about-right-card">
+              <div class="about-section-block">
+                <div class="toolbox-header-row">
+                  <span class="toolbox-icon">
+                    <svg class="toolbox-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                      <line x1="8" y1="21" x2="16" y2="21"></line>
+                      <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                  </span>
+                  <h4>开发栈</h4>
+                </div>
+                <div class="lang-list">
+                  <!-- Python 15% -->
+                  <div class="lang-row lang-level-15" title="Python: 15% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z" fill="#3776AB"/>
+                      </svg>
+                      <span class="lang-text-name">Python</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">15%</span>
+                    </div>
+                  </div>
+
+                  <!-- HTML 5% -->
+                  <div class="lang-row lang-level-5" title="HTML: 5% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z" fill="#E34F26"/>
+                      </svg>
+                      <span class="lang-text-name">HTML</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">5%</span>
+                    </div>
+                  </div>
+
+                  <!-- C# 1% -->
+                  <div class="lang-row lang-level-1" title="C#: 1% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.194 7.543v8.913c0 1.103.588 2.122 1.544 2.674l7.718 4.456a3.086 3.086 0 0 0 3.088 0l7.718-4.456a3.087 3.087 0 0 0 1.544-2.674V7.543a3.084 3.084 0 0 0-1.544-2.673L13.544.414a3.086 3.086 0 0 0-3.088 0L2.738 4.87a3.085 3.085 0 0 0-1.544 2.673Zm5.403 2.914v3.087a.77.77 0 0 0 .772.772.773.773 0 0 0 .772-.772.773.773 0 0 1 1.317-.546.775.775 0 0 1 .226.546 2.314 2.314 0 1 1-4.631 0v-3.087c0-.615.244-1.203.679-1.637a2.312 2.312 0 0 1 3.274 0c.434.434.678 1.023.678 1.637a.769.769 0 0 1-.226.545.767.767 0 0 1-1.091 0 .77.77 0 0 1-.226-.545.77.77 0 0 1-.772-.772.771.771 0 0 0-.772.772Zm12.35 3.087a.77.77 0 0 1-.772.772h-.772v.772a.773.773 0 0 1-1.544 0v-.772h-1.544v.772a.773.773 0 0 1-1.317.546.775.775 0 0 1-.226-.546v-.772H12a.771.771 0 1 1 0-1.544h.772v-1.543H12a.77.77 0 1 1 0-1.544h.772v-.772a.773.773 0 0 1 1.317-.546.775.775 0 0 1 .226.546v.772h1.544v-.772a.773.773 0 0 1 1.544 0v.772h.772a.772.772 0 0 1 0 1.544h-.772v1.543h.772a.776.776 0 0 1 .772.772Zm-3.088-2.315h-1.544v1.543h1.544v-1.543Z" fill="#5C2D91"/>
+                      </svg>
+                      <span class="lang-text-name">C#</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">1%</span>
+                    </div>
+                  </div>
+
+                  <!-- Go 0% -->
+                  <div class="lang-row lang-level-0" title="Go: 0% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.811 10.231c-.047 0-.058-.023-.035-.059l.246-.315c.023-.035.081-.058.128-.058h4.172c.046 0 .058.035.035.07l-.199.303c-.023.036-.082.07-.117.07zM.047 11.306c-.047 0-.059-.023-.035-.058l.245-.316c.023-.035.082-.058.129-.058h5.328c.047 0 .07.035.058.07l-.093.28c-.012.047-.058.07-.105.07zm2.828 1.075c-.047 0-.059-.035-.035-.07l.163-.292c.023-.035.07-.07.117-.07h2.337c.047 0 .07.035.07.082l-.023.28c0 .047-.047.082-.082.082zm12.129-2.36c-.736.187-1.239.327-1.963.514-.176.046-.187.058-.34-.117-.174-.199-.303-.327-.548-.444-.737-.362-1.45-.257-2.115.175-.795.514-1.204 1.274-1.192 2.22.011.935.654 1.706 1.577 1.835.795.105 1.46-.175 1.987-.77.105-.13.198-.27.315-.434H10.47c-.245 0-.304-.152-.222-.35.152-.362.432-.97.596-1.274a.315.315 0 01.292-.187h4.253c-.023.316-.023.631-.07.947a4.983 4.983 0 01-.958 2.29c-.841 1.11-1.94 1.8-3.33 1.986-1.145.152-2.209-.07-3.143-.77-.865-.655-1.356-1.52-1.484-2.595-.152-1.274.222-2.419.993-3.424.83-1.086 1.928-1.776 3.272-2.02 1.098-.2 2.15-.07 3.096.571.62.41 1.063.97 1.356 1.648.07.105.023.164-.117.2m3.868 6.461c-1.064-.024-2.034-.328-2.852-1.029a3.665 3.665 0 01-1.262-2.255c-.21-1.32.152-2.489.947-3.529.853-1.122 1.881-1.706 3.272-1.95c.923.63 1.496 1.484 1.648 2.605.198 1.578-.257 2.863-1.344 3.962-.771.783-1.718 1.273-2.805 1.495-.315.06-.63.07-.934.106zm2.78-4.72c-.011-.153-.011-.27-.034-.387-.21-1.157-1.274-1.81-2.384-1.554-1.087.245-1.788.935-2.045 2.033-.21.912.234 1.835 1.075 2.21.643.28 1.285.244 1.905-.07.923-.48 1.425-1.228 1.484-2.233z" fill="#00ADD8"/>
+                      </svg>
+                      <span class="lang-text-name">Go</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- TypeScript 0% -->
+                  <div class="lang-row lang-level-0" title="TypeScript: 0% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z" fill="#3178C6"/>
+                      </svg>
+                      <span class="lang-text-name">TypeScript</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- JavaScript 0% -->
+                  <div class="lang-row lang-level-0" title="JavaScript: 0% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z" fill="#F7DF1E"/>
+                      </svg>
+                      <span class="lang-text-name">JavaScript</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- CSS 0% -->
+                  <div class="lang-row lang-level-0" title="CSS: 0% 掌握度">
+                    <div class="lang-row-left">
+                      <svg class="lang-svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.41l.213 2.622 10.125.002-.255 2.716h-6.64l.24 2.573h6.182l-.366 3.523-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.288l5.373-1.53L18.59 4.414z" fill="#1572B6"/>
+                      </svg>
+                      <span class="lang-text-name">CSS</span>
+                    </div>
+                    <div class="lang-row-right">
+                      <span class="lang-percent-badge">0%</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="toolbox-text-small">代表曾经 vibe coding 过的熟练度分布（悬浮可点亮，越暗越需要查文档 (つ﹏⊂)）。</p>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          <!-- 桌面环境 -->
+          <ScrollReveal animation="fade-up" delay={200}>
+            <div class="glass-card about-toolbox-card">
+              <div class="about-section-block">
+                <div class="toolbox-header-row">
+                  <span class="toolbox-icon">
+                    <svg class="toolbox-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                      <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                      <line x1="6" y1="8" x2="6.01" y2="8"></line>
+                      <line x1="10" y1="8" x2="10.01" y2="8"></line>
+                      <line x1="14" y1="8" x2="14.01" y2="8"></line>
+                      <line x1="18" y1="8" x2="18.01" y2="8"></line>
+                      <line x1="6" y1="12" x2="6.01" y2="12"></line>
+                      <line x1="10" y1="12" x2="10.01" y2="12"></line>
+                      <line x1="14" y1="12" x2="14.01" y2="12"></line>
+                      <line x1="18" y1="12" x2="18.01" y2="12"></line>
+                      <line x1="7" y1="16" x2="17" y2="16"></line>
+                    </svg>
+                  </span>
+                  <h4>桌面环境</h4>
+                </div>
+                <div class="toolbox-tags-row">
+                  <span class="badge">拯救者 R9000P</span>
+                  <span class="badge">REDMI G Pro 27 U</span>
+                  <span class="badge">EWEADN V102</span>
+                  <span class="badge">Logitech G502</span>
+                  <span class="badge">Aigo 拓展坞</span>
+                </div>
+                <p class="toolbox-text-small">配备 Lenovo Legion R9000P ADR 10 便携式电脑与 REDMI G Pro 27 U 2026 显示器，键盘使用 EWEADN V102 等高线，搭载罗技 G502 Hero 鼠标与爱国者拓展坞。</p>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </div>
+    </section>
+
+    <!-- 次屏 最新文章 -->
+    <section id="blog-section" class="blog-fold">
+      <div class="section-header">
+        <h2 class="section-title">最新文章</h2>
+        <a href="/archive/" class="archive-link">查看归档 &rarr;</a>
+      </div>
+      
+      {posts.length > 0 ? (
+        <div class="posts-grid-layout">
+          {posts.map((post) => {
+            const slug = getPostSlug(post);
+            return (
+              <PostCard 
+                title={post.data.title}
+                description={post.data.description}
+                date={post.data.date}
+                slug={slug}
+                readingTime={getPostReadingTime(post)}
+                tags={post.data.tags}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>暂无已发布的文章，请登录后台管理页面添加第一篇文章。</p>
+        </div>
+      )}
+    </section>
+  </div>
+</Layout>
+
+<script>
+  function updateGreeting() {
+    const greetingEl = document.getElementById('dynamic-greeting');
+    if (!greetingEl) return;
+    
+    const hour = new Date().getHours();
+    let text = '你好，';
+    if (hour >= 0 && hour < 6) {
+      text = '凌晨好！';
+    } else if (hour >= 6 && hour < 11) {
+      text = '早上好！';
+    } else if (hour >= 11 && hour < 13) {
+      text = '中午好！';
+    } else if (hour >= 13 && hour < 18) {
+      text = '下午好！';
+    } else if (hour >= 18 && hour < 23) {
+      text = '晚上好！';
+    } else {
+      text = '深夜好！';
+    }
+    
+    greetingEl.textContent = text;
+  }
+
+  function initTypewriter() {
+    const el = document.getElementById('typed-bio');
+    if (!el) return;
+    const typedEl = el;
+    
+    // Clean up existing cursor if any
+    const existingCursor = typedEl.nextSibling as HTMLElement | null;
+    if (existingCursor && existingCursor.classList && existingCursor.classList.contains('typing-cursor')) {
+      existingCursor.remove();
+    }
+    
+    if (!typedEl.dataset.originalText) {
+      typedEl.dataset.originalText = typedEl.textContent ? typedEl.textContent.trim() : '';
+    }
+    
+    const text = typedEl.dataset.originalText;
+    typedEl.textContent = '';
+    
+    let index = 0;
+    const speed = 40; // ms per char
+    
+    // Create cursor
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    cursor.textContent = '|';
+    typedEl.parentNode?.insertBefore(cursor, typedEl.nextSibling);
+    
+    let timerId: any;
+    function type() {
+      if (index < text.length) {
+        typedEl.textContent += text.charAt(index);
+        index++;
+        timerId = setTimeout(type, speed);
+      } else {
+        cursor.classList.add('finished');
+      }
+    }
+    
+    type();
+    
+    // Clean up on page swap
+    document.addEventListener('astro:before-swap', () => {
+      clearTimeout(timerId);
+      cursor.remove();
+    }, { once: true });
+  }
+
+  // 每次页面加载（包括单页跳转）时运行
+  document.addEventListener('astro:page-load', () => {
+    updateGreeting();
+    initTypewriter();
+  });
+</script>
+
+<style>
+  /* 首页容器与分屏设计 */
+  .index-layout {
+    padding-top: 5.5rem;
+  }
+
+  /* 首屏 Hero */
+  .hero-fold {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(90vh - 5rem);
+    position: relative;
+    padding-bottom: 5rem;
+    margin-bottom: 5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  /* 个人介绍区 */
+  .hero-intro-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .greeting-container {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .active-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #2ec4b6; /* 活力绿 */
+    position: relative;
+    display: inline-block;
+  }
+  .active-status-dot::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    background-color: #2ec4b6;
+    animation: statusPulse 2s infinite ease-in-out;
+  }
+  @keyframes statusPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+  .dynamic-greeting-text {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .intro-title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .intro-title .highlight {
+    background: linear-gradient(135deg, hsl(var(--hue), 90%, 60%) 0%, hsl(calc(var(--hue) + 40), 90%, 55%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+  }
+  .intro-tagline {
+    font-size: 1.25rem;
+    color: var(--text-main);
+    font-weight: 600;
+    margin-top: -0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .intro-bio {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    max-width: 500px;
+    display: inline;
+  }
+  .intro-links {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .link-icon {
+    flex-shrink: 0;
+  }
+
+  /* 项目卡片展示区 */
+  .hero-projects-area {
+    display: flex;
+    flex-direction: column;
+  }
+  .projects-card {
+    padding: 2.2rem;
+    position: relative;
+    overflow: visible;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+  }
+  .projects-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.04);
+    border-color: hsl(var(--hue), 85%, 60%);
+  }
+  [data-theme="dark"] .projects-card:hover {
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+  }
+
+
+  .projects-card-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .projects-aura {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 50%, hsla(var(--hue), 80%, 60%, 0.12) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .projects-card:hover .projects-aura {
+    opacity: 1;
+  }
+  .projects-card-title {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+  }
+  .projects-list-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .project-card-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .proj-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .proj-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .proj-title a {
+    color: var(--text-main);
+    position: relative;
+    padding-bottom: 2px;
+  }
+  .proj-title a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; width: 0; height: 1px;
+    background-color: var(--color-accent);
+    transition: width 0.3s ease;
+  }
+  .proj-title a:hover::after {
+    width: 100%;
+  }
+  .proj-title a:hover {
+    color: var(--color-accent);
+  }
+  .proj-status {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+  }
+  .proj-status.active {
+    color: #2e4a3e;
+    background: rgba(46, 74, 62, 0.06);
+    border-color: rgba(46, 74, 62, 0.15);
+  }
+  [data-theme="dark"] .proj-status.active {
+    color: #8aad94;
+    background: rgba(138, 173, 148, 0.1);
+  }
+
+
+  .proj-status.coding {
+    color: #a0522d;
+    background: rgba(160, 82, 45, 0.06);
+    border-color: rgba(160, 82, 45, 0.15);
+  }
+  [data-theme="dark"] .proj-status.coding {
+    color: #e59866;
+    background: rgba(229, 152, 102, 0.1);
+  }
+
+
+  .proj-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .proj-meta-tags {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  /* 向下滑动指示器 */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .scroll-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+  .scroll-link:hover {
+    color: var(--color-accent);
+    transform: translateY(2px);
+  }
+  .scroll-arrow {
+    width: 16px;
+    height: 16px;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+    60% { transform: translateY(-2.5px); }
+  }
+
+  /* 次屏最新文章 */
+  .blog-fold {
+    padding-top: 2rem;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2.5rem;
+    padding-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .archive-link {
+    font-size: 0.88rem;
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+  .archive-link:hover {
+    color: var(--color-accent-hover);
+  }
+  .posts-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+  }
+  @media (min-width: 768px) {
+    .posts-grid-layout {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 5rem 1.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  /* 响应式断点 */
+  @media (max-width: 868px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 3.5rem;
+    }
+  }
+  @media (max-width: 768px) {
+    .hero-fold {
+      padding-top: 1rem;
+      min-height: auto;
+      padding-bottom: 2rem;
+      margin-bottom: 3.5rem;
+    }
+    .scroll-indicator {
+      display: none;
+    }
+  }
+
+  /* Typewriter cursor styling */
+  .typing-cursor {
+    color: var(--color-accent);
+    font-weight: bold;
+    animation: typingBlink 0.8s infinite;
+    margin-left: 2px;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  @keyframes typingBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .typing-cursor.finished {
+    animation: fadeOutCursor 1s forwards;
+    animation-delay: 2s;
+  }
+  @keyframes fadeOutCursor {
+    to { opacity: 0; }
+  }
+
+  /* 关于 & 装备库版块样式 */
+  .about-fold {
+    padding-top: 5.5rem;
+    margin-bottom: 5rem;
+  }
+  .about-hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .about-bio-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .about-toolbox-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .bio-card,
+  .site-card {
+    padding: 2rem;
+  }
+  .card-subtitle-small {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--text-main);
+    font-family: var(--font-sans);
+  }
+  .bio-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* 装备库微型卡片 */
+  .toolbox-card-mini {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                border-color 0.3s ease;
+  }
+  .toolbox-card-mini:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 25px var(--color-accent-bg);
+  }
+  .toolbox-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .toolbox-header-row h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .toolbox-icon {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .toolbox-icon-svg {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+  .about-section-block:hover .toolbox-icon-svg {
+    transform: scale(1.1) rotate(5deg);
+  }
+  .toolbox-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .toolbox-text-small {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* 开发栈列表 & 官方语言图标亮度控制 */
+  .lang-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .lang-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.65rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(44, 42, 41, 0.06);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  [data-theme="dark"] .lang-row {
+    background: rgba(26, 26, 26, 0.45);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  .lang-row-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .lang-svg-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
+  .lang-text-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-main);
+  }
+  .lang-percent-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* 掌握程度与对应亮度控制 */
+  .lang-level-15 {
+    opacity: 0.7;
+    filter: grayscale(30%);
+  }
+  .lang-level-5 {
+    opacity: 0.5;
+    filter: grayscale(70%);
+  }
+  .lang-level-1 {
+    opacity: 0.3;
+    filter: grayscale(90%);
+  }
+  .lang-level-0 {
+    opacity: 0.15;
+    filter: grayscale(100%);
+  }
+
+  /* 大卡片布局 */
+  .about-left-card,
+  .about-right-card,
+  .about-toolbox-card {
+    padding: 2.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+  }
+  .about-toolbox-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .about-section-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .about-section-divider {
+    height: 1px;
+    background: var(--border-color);
+    width: 100%;
+    opacity: 0.8;
+  }
+
+  /* 悬停互动激活：恢复原样亮起 */
+  .lang-row:hover {
+    filter: none;
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--color-accent);
+    transform: translateX(3px);
+  }
+  [data-theme="dark"] .lang-row:hover {
+    background: rgba(26, 26, 26, 0.85);
+  }
+
+  @media (max-width: 868px) {
+    .about-hero-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .about-fold {
+      padding-top: 2rem;
+    }
+  }
+</style>

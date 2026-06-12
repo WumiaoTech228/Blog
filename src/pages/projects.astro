@@ -1,0 +1,209 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import { SITE } from '../config';
+
+const projects = [
+  {
+    title: 'Blog',
+    description: '基于 Astro & Keystatic 构建的极简无服务器个人博客，也是本站的底层驱动。支持双色模式和可视化富文本后台，具备极高性能与高安全性。数据完全依托于 GitHub，静态编译后全量部署于 Cloudflare Pages 边缘节点。',
+    tech: ['Astro', 'Keystatic', 'TypeScript', 'Tailwind-free CSS', 'Cloudflare Pages'],
+    github: 'https://github.com/WumiaoTech228/Blog',
+    status: '已上线',
+    themeColor: 'var(--hue)'
+  },
+  {
+    title: 'LepoProxy',
+    description: '基于 Tauri v2 + Sing-Box 内核构筑的下一代全协议高性能桌面代理客户端。以 Rust (Tauri) 构筑骨架，以 Go (Sing-Box) 注入底层灵魂，原生兼容 Reality、Hysteria 2、AnyTLS、ECH 等顶级抗审查协议，支持 100% 本地纯离线订阅转译，融汇极致性能与文人交互美学。',
+    tech: ['Rust', 'Tauri v2', 'Go', 'Sing-Box', 'Network'],
+    github: 'https://github.com/WumiaoTech228/LepoProxy',
+    status: '开发中',
+    themeColor: '200'
+  },
+  {
+    title: 'GlimOfficeInstaller',
+    description: '一款便携、轻量化、原版化的微软 Office 辅助部署与安装激活工具。支持自定义选择要安装的 Office 组件，内置 Ohook 激活引擎；另包含隐藏的 Windows 激活、ESU 部署及授权信息管理等神秘极客功能。',
+    tech: ['C#', '.NET', 'Office Deployment', 'Ohook'],
+    github: 'https://github.com/WumiaoTech228/GlimOfficeInstaller',
+    status: '开发中',
+    themeColor: '140'
+  }
+];
+---
+
+<Layout title={`折腾项目 - ${SITE.title}`} description="展示博主 无渺 正在开发或已完成的开源项目与工具。">
+  <div class="projects-layout container">
+    <div class="projects-grid">
+      <!-- 左栏：项目列表 -->
+      <main class="projects-main">
+        <h1 class="projects-title">折腾项目</h1>
+        <p class="projects-subtitle">记录我正在折腾或已经上线的工具和开源项目。</p>
+        
+        <div class="projects-list">
+          {projects.map((proj) => (
+            <section class="glass-card project-card-detail" style={`--aura-color: ${proj.themeColor}`}>
+              <div class="project-aura"></div>
+              <div class="project-card-detail-inner">
+                <header class="project-card-header">
+                  <h2 class="project-card-title">{proj.title}</h2>
+                  <span class="project-status-badge">{proj.status}</span>
+                </header>
+                <p class="project-desc">{proj.description}</p>
+                
+                <div class="project-tech-tags">
+                  {proj.tech.map((t) => (
+                    <span class="badge">{t}</span>
+                  ))}
+                </div>
+                
+                <div class="project-links">
+                  <a href={proj.github} target="_blank" rel="noopener noreferrer" class="btn-outline">
+                    查看 GitHub 仓库 &rarr;
+                  </a>
+                </div>
+              </div>
+            </section>
+          ))}
+        </div>
+      </main>
+
+      <!-- 右栏：博主卡片 -->
+      <aside class="projects-sidebar">
+        <div class="glass-card sidebar-card">
+          <ProfileCard />
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .projects-layout {
+    padding-top: 5.5rem;
+  }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: start;
+  }
+  .projects-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .projects-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+  }
+  
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .project-card-detail {
+    position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 2.2rem;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+  }
+  .project-card-detail-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    height: 100%;
+  }
+  .project-card-detail:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.04);
+    border-color: hsl(var(--aura-color, var(--hue)), 85%, 60%);
+  }
+  [data-theme="dark"] .project-card-detail:hover {
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+  }
+
+  .project-aura {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 50%, hsla(var(--aura-color, var(--hue)), 80%, 60%, 0.12) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .project-card-detail:hover .project-aura {
+    opacity: 1;
+  }
+  .project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .project-card-title {
+    font-family: var(--font-sans);
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+  .project-status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+  .project-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .project-tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .project-links {
+    margin-top: 0.5rem;
+  }
+  .project-links a {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  /* 侧栏样式 */
+  .projects-sidebar {
+    position: sticky;
+    top: 90px;
+  }
+  .sidebar-card {
+    padding: 1.5rem;
+  }
+
+  /* 响应式 */
+  @media (max-width: 868px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .projects-sidebar {
+      position: static;
+    }
+  }
+</style>

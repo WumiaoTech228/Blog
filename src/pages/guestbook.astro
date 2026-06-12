@@ -1,0 +1,1239 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import { SITE } from '../config';
+---
+
+<Layout title={`互动空间 - ${SITE.title}`} description="浏览友情链接以进行交流，或者在留言板下留下你的足迹。">
+  <div class="guestbook-layout container">
+    <header class="guestbook-header">
+      <ScrollReveal animation="fade-up" delay={0}>
+        <h1 class="guestbook-title">互动空间</h1>
+      </ScrollReveal>
+      <ScrollReveal animation="fade-up" delay={80}>
+        <p class="guestbook-subtitle">探索本站的友情链接以相互交流，或者在留言墙留下你的足迹。留言保存在本地浏览器中。</p>
+      </ScrollReveal>
+    </header>
+
+    <!-- 标签切换器 (友情链接在前，留言墙在后) -->
+    <ScrollReveal animation="fade-up" delay={120}>
+      <div class="tab-switcher-container">
+        <div class="tab-switcher glass-pill">
+          <button class="tab-btn active" data-tab="friends" aria-label="显示友情链接">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            友情链接
+          </button>
+          <button class="tab-btn" data-tab="guestbook" aria-label="显示留言墙">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            留言墙
+          </button>
+          <div class="tab-slider" id="tab-slider"></div>
+        </div>
+      </div>
+    </ScrollReveal>
+
+    <!-- Tab 1: 友情链接内容 (默认激活并展示) -->
+    <div id="tab-content-friends" class="tab-content active" style="display: block;">
+      <!-- 友情链接卡片网格 -->
+      <section class="friends-section">
+        <div id="friends-grid" class="friends-grid">
+          <!-- 动态渲染的友情链接卡片 -->
+        </div>
+      </section>
+
+      <!-- 交换友链说明 -->
+      <ScrollReveal animation="fade-up" delay={200}>
+        <section class="glass-card apply-section">
+          <div class="apply-header">
+            <h2 class="apply-title">申请交换友链</h2>
+            <p class="apply-desc">欢迎优秀的个人博客或技术站点交换链接。请先在贵站添加本站信息，并在留言墙留言或通过邮件告知，我会在第一时间添加。</p>
+          </div>
+          
+          <div class="apply-info-container">
+            <div class="apply-info-list">
+              <div class="apply-info-item">
+                <span class="info-label">本站名称</span>
+                <span class="info-value">无渺</span>
+              </div>
+              <div class="apply-info-item">
+                <span class="info-label">本站链接</span>
+                <span class="info-value select-all">https://blog.110228.xyz</span>
+              </div>
+              <div class="apply-info-item">
+                <span class="info-label">头像链接</span>
+                <span class="info-value select-all">https://blog.110228.xyz/images/avatar.webp</span>
+              </div>
+              <div class="apply-info-item">
+                <span class="info-label">站点简介</span>
+                <span class="info-value">宇宙的边缘，代码的温床。</span>
+              </div>
+            </div>
+
+            <div class="apply-copy-box">
+              <div class="copy-header">
+                <span>友链格式 (JSON)</span>
+                <button class="copy-btn" id="copy-info-btn">
+                  <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span class="copy-btn-text">复制格式</span>
+                </button>
+              </div>
+              <pre class="code-block"><code id="friend-json-code">{`{
+  "name": "无渺",
+  "url": "https://blog.110228.xyz",
+  "avatar": "https://blog.110228.xyz/images/avatar.webp",
+  "description": "宇宙的边缘，代码的温床。"
+}`}</code></pre>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+    </div>
+
+    <!-- Tab 2: 留言墙内容 (默认隐藏) -->
+    <div id="tab-content-guestbook" class="tab-content" style="display: none;">
+      <!-- 留言提示区 -->
+      <ScrollReveal animation="fade-up" delay={140}>
+        <div class="guestbook-notice">
+          <svg class="notice-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span class="notice-text">提示：当前留言墙基于本地浏览器存储 (LocalStorage) 运行，您的留言仅在当前设备浏览器中可见且可编辑，清除浏览器缓存将清空所有留言。</span>
+        </div>
+      </ScrollReveal>
+
+      <!-- 留言表单区 -->
+      <ScrollReveal animation="fade-up" delay={160}>
+        <section class="glass-card form-section">
+          <form id="guestbook-form" class="guestbook-form">
+            <div class="form-rows-container">
+              <div class="form-row inputs-row">
+                <div class="form-group nickname-group">
+                  <label for="gb-nickname">昵称</label>
+                  <input 
+                    type="text" 
+                    id="gb-nickname" 
+                    placeholder="你的昵称" 
+                    required 
+                    maxlength="15" 
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="form-group content-group">
+                  <label for="gb-content">留言内容</label>
+                  <input 
+                    type="text" 
+                    id="gb-content" 
+                    placeholder="说点什么吧..." 
+                    required 
+                    maxlength="100" 
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-row meta-row">
+                <!-- 心情 Emoji 选择器 -->
+                <div class="form-group emoji-picker-group">
+                  <label>留言心情</label>
+                  <div class="emoji-picker">
+                    <label class="emoji-opt">
+                      <input type="radio" name="gb-emoji" value="📝" checked />
+                      <span class="emoji-btn" title="留言">
+                        <svg class="emoji-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        留言
+                      </span>
+                    </label>
+                    <label class="emoji-opt">
+                      <input type="radio" name="gb-emoji" value="💡" />
+                      <span class="emoji-btn" title="想法">
+                        <svg class="emoji-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M9 18h6"></path>
+                          <path d="M10 22h4"></path>
+                          <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path>
+                        </svg>
+                        想法
+                      </span>
+                    </label>
+                    <label class="emoji-opt">
+                      <input type="radio" name="gb-emoji" value="🎉" />
+                      <span class="emoji-btn" title="庆祝">
+                        <svg class="emoji-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                        </svg>
+                        庆祝
+                      </span>
+                    </label>
+                    <label class="emoji-opt">
+                      <input type="radio" name="gb-emoji" value="☕" />
+                      <span class="emoji-btn" title="闲聊">
+                        <svg class="emoji-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                          <line x1="6" y1="1" x2="6" y2="4"></line>
+                          <line x1="10" y1="1" x2="10" y2="4"></line>
+                          <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                        闲聊
+                      </span>
+                    </label>
+                    <label class="emoji-opt">
+                      <input type="radio" name="gb-emoji" value="💬" />
+                      <span class="emoji-btn" title="吐槽">
+                        <svg class="emoji-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        吐槽
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 便签颜色选择器 -->
+                <div class="form-group color-picker-group">
+                  <label>便签底色</label>
+                  <div class="color-picker">
+                    <label class="color-opt color-1">
+                      <input type="radio" name="gb-color" value="1" checked />
+                      <span class="color-dot" title="柠檬黄"></span>
+                    </label>
+                    <label class="color-opt color-2">
+                      <input type="radio" name="gb-color" value="2" />
+                      <span class="color-dot" title="薄荷绿"></span>
+                    </label>
+                    <label class="color-opt color-3">
+                      <input type="radio" name="gb-color" value="3" />
+                      <span class="color-dot" title="天空蓝"></span>
+                    </label>
+                    <label class="color-opt color-4">
+                      <input type="radio" name="gb-color" value="4" />
+                      <span class="color-dot" title="兰花紫"></span>
+                    </label>
+                    <label class="color-opt color-5">
+                      <input type="radio" name="gb-color" value="5" />
+                      <span class="color-dot" title="活力红"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-action">
+                  <button type="submit" class="btn-primary form-submit-btn">
+                    贴上便签
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </section>
+      </ScrollReveal>
+
+      <!-- 便签展示墙 -->
+      <section class="board-section">
+        <div id="guestbook-board" class="guestbook-board">
+          <!-- 动态渲染的便签卡片 -->
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  interface Message {
+    id: string;
+    nickname: string;
+    content: string;
+    date: string;
+    colorIndex: number;
+    emoji?: string;
+  }
+
+  interface Friend {
+    name: string;
+    url: string;
+    avatar: string;
+    description: string;
+    themeColor: string; // HSL Hue or full CSS color rule
+  }
+
+  const PRESETS: Omit<Message, 'id'>[] = [
+    { nickname: "小飞侠", content: "博客设计的非常有科技感，这个背景漂移光晕太好看了！", date: "2026-06-11", colorIndex: 1, emoji: "💡" },
+    { nickname: "折腾党", content: "本站这套 Astro + Cloudflare 部署方案非常棒，免维护体验极佳！", date: "2026-06-11", colorIndex: 2, emoji: "📝" },
+    { nickname: "VibeCoder", content: "Cmd+K 这个命令控制面板可以直接切色相，太酷炫了！", date: "2026-06-11", colorIndex: 3, emoji: "🎉" },
+    { nickname: "听歌写代码", content: "路过留个爪，顺便听一下左下角的 Lofi 音乐，氛围感拉满。", date: "2026-06-11", colorIndex: 4, emoji: "☕" },
+    { nickname: "排版控", content: "中西文字体搭配极具质感，Outfit 与思源宋体简直绝配！", date: "2026-06-11", colorIndex: 5, emoji: "📝" },
+    { nickname: "催更人", content: "博主加油，LepoProxy 的并发分流代理什么时候上线？期待开源！", date: "2026-06-11", colorIndex: 1, emoji: "💬" }
+  ];
+
+  const FRIENDS: Friend[] = [
+    {
+      name: "无渺 Space",
+      url: "https://blog.110228.xyz",
+      avatar: "/images/avatar.webp",
+      description: "宇宙的边缘，代码的温床。本站主站。",
+      themeColor: "var(--hue)"
+    }
+  ];
+
+  function getSavedMessages(): Message[] {
+    const data = localStorage.getItem('guestbook_messages');
+    if (!data) {
+      const initial = PRESETS.map((p, index) => ({
+        ...p,
+        id: 'preset-' + index
+      }));
+      localStorage.setItem('guestbook_messages', JSON.stringify(initial));
+      return initial;
+    }
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+
+  function saveMessages(messages: Message[]) {
+    localStorage.setItem('guestbook_messages', JSON.stringify(messages));
+  }
+
+  function escapeHTML(str: string): string {
+    return str.replace(/[&<>"']/g, (m) => {
+      switch (m) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return m;
+      }
+    });
+  }
+
+  function createCardHTML(msg: Message): string {
+    const colors = ['yellow', 'green', 'blue', 'purple', 'red'];
+    const colorClass = `note-color-${colors[msg.colorIndex - 1] || 'yellow'}`;
+    
+    // Map emoji strings to SVG strings for safe Linux rendering and uniform style
+    const EMOJI_MAP: Record<string, string> = {
+      '📝': `<svg class="note-emoji-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+      '💡': `<svg class="note-emoji-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg>`,
+      '🎉': `<svg class="note-emoji-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>`,
+      '☕': `<svg class="note-emoji-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`,
+      '💬': `<svg class="note-emoji-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+    };
+    const emojiSvg = EMOJI_MAP[msg.emoji || '📝'] || EMOJI_MAP['📝'];
+    const cleanName = escapeHTML(msg.nickname);
+    const cleanContent = escapeHTML(msg.content);
+
+    return `
+      <div class="note-card ${colorClass}" id="card-${msg.id}">
+        <div class="note-emoji-stamp">${emojiSvg}</div>
+        <p class="note-text">"${cleanContent}"</p>
+        <div class="note-meta">
+          <span class="note-author">@ ${cleanName}</span>
+          <span class="note-date">${msg.date}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function createFriendCardHTML(friend: Friend): string {
+    return `
+      <a href="${friend.url}" target="_blank" rel="noopener noreferrer" class="friend-card" style="--aura-color: ${friend.themeColor}">
+        <div class="friend-aura"></div>
+        <div class="friend-card-inner">
+          <div class="friend-avatar-container">
+            <img src="${friend.avatar}" alt="${friend.name} 头像" class="friend-avatar" loading="lazy" onerror="this.src='/images/avatar.webp'" />
+          </div>
+          <div class="friend-info">
+            <h3 class="friend-name">
+              <span>${friend.name}</span>
+              <svg class="friend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </h3>
+            <p class="friend-desc" title="${friend.description}">${friend.description}</p>
+          </div>
+        </div>
+      </a>
+    `;
+  }
+
+  function initInteraction() {
+    // --- 1. Tab Switching ---
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const slider = document.getElementById('tab-slider');
+    
+    function switchTab(tabId: string, animate: boolean = true) {
+      const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`) as HTMLElement | null;
+      if (!activeBtn) return;
+
+      // Update button classes
+      tabBtns.forEach(btn => btn.classList.toggle('active', btn === activeBtn));
+
+      // Update slider styles
+      if (slider) {
+        if (!animate) {
+          slider.style.transition = 'none';
+        } else {
+          slider.style.transition = 'left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+        }
+        slider.style.left = `${activeBtn.offsetLeft}px`;
+        slider.style.width = `${activeBtn.offsetWidth}px`;
+        if (!animate) {
+          // Force layout reflow then restore transition
+          slider.offsetHeight;
+          slider.style.transition = '';
+        }
+      }
+
+      // Switch panels
+      const contents = ['guestbook', 'friends'];
+      contents.forEach(c => {
+        const el = document.getElementById(`tab-content-${c}`);
+        if (!el) return;
+        if (c === tabId) {
+          el.style.display = 'block';
+          if (animate) {
+            // Trigger animation
+            el.offsetHeight;
+            el.classList.add('active');
+          } else {
+            el.classList.add('active');
+          }
+        } else {
+          el.classList.remove('active');
+          if (animate) {
+            setTimeout(() => {
+              if (!el.classList.contains('active')) {
+                el.style.display = 'none';
+              }
+            }, 300);
+          } else {
+            el.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        if (tab) switchTab(tab);
+      });
+    });
+
+    // Run initial tab setup (no animation) - 友链优先
+    switchTab('friends', false);
+
+    // Re-verify slider width on window resize
+    window.addEventListener('resize', () => {
+      const activeBtn = document.querySelector('.tab-btn.active') as HTMLElement | null;
+      if (activeBtn && slider) {
+        slider.style.transition = 'none';
+        slider.style.left = `${activeBtn.offsetLeft}px`;
+        slider.style.width = `${activeBtn.offsetWidth}px`;
+      }
+    }, { passive: true });
+
+
+    // --- 2. Guestbook Logic ---
+    const board = document.getElementById('guestbook-board');
+    const form = document.getElementById('guestbook-form') as HTMLFormElement | null;
+    
+    if (board && form) {
+      let messages = getSavedMessages();
+      board.innerHTML = messages.map(msg => createCardHTML(msg)).join('');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const nicknameInput = document.getElementById('gb-nickname') as HTMLInputElement;
+        const contentInput = document.getElementById('gb-content') as HTMLInputElement;
+        const emojiRadio = form.querySelector('input[name="gb-emoji"]:checked') as HTMLInputElement | null;
+        const colorRadio = form.querySelector('input[name="gb-color"]:checked') as HTMLInputElement | null;
+
+        const nickname = nicknameInput.value.trim();
+        const content = contentInput.value.trim();
+        const emoji = emojiRadio ? emojiRadio.value : '📝';
+        const colorIndex = colorRadio ? parseInt(colorRadio.value, 10) : 1;
+
+        if (!nickname || !content) return;
+
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        
+        const newMsg: Message = {
+          id: Date.now().toString(),
+          nickname,
+          content,
+          date: dateStr,
+          colorIndex,
+          emoji
+        };
+
+        messages.unshift(newMsg);
+        saveMessages(messages);
+
+        // Render card with entry transition
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = createCardHTML(newMsg);
+        const cardEl = tempDiv.firstElementChild as HTMLElement;
+        cardEl.classList.add('is-new');
+        
+        board.insertBefore(cardEl, board.firstChild);
+        
+        // Trigger reflow
+        cardEl.offsetHeight;
+        cardEl.classList.remove('is-new');
+
+        form.reset();
+
+        // Trigger confetti particle effect
+        const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (submitBtn && window.triggerConfetti) {
+          const rect = submitBtn.getBoundingClientRect();
+          window.triggerConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+      });
+    }
+
+    // --- 3. Friends Link Render ---
+    const friendsGrid = document.getElementById('friends-grid');
+    if (friendsGrid) {
+      friendsGrid.innerHTML = FRIENDS.map(f => createFriendCardHTML(f)).join('');
+    }
+
+    // --- 4. Info Copy Logic ---
+    const copyBtn = document.getElementById('copy-info-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const codeEl = document.getElementById('friend-json-code');
+        const btnText = copyBtn.querySelector('.copy-btn-text');
+        if (codeEl && btnText) {
+          navigator.clipboard.writeText(codeEl.textContent || '')
+            .then(() => {
+              btnText.textContent = '已复制!';
+              copyBtn.classList.add('copied');
+              setTimeout(() => {
+                btnText.textContent = '复制格式';
+                copyBtn.classList.remove('copied');
+              }, 2000);
+            })
+            .catch(err => {
+              console.error('Failed to copy text: ', err);
+            });
+        }
+      });
+    }
+  }
+
+  if (!(window as any).__guestbookInitialized) {
+    (window as any).__guestbookInitialized = true;
+    document.addEventListener('astro:page-load', initInteraction);
+  }
+</script>
+
+<style is:global>
+  .guestbook-layout {
+    max-width: 1000px;
+    padding-top: 5.5rem;
+  }
+  .guestbook-header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+  .guestbook-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .guestbook-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* 标签切换器 */
+  .tab-switcher-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+  }
+  .tab-switcher {
+    position: relative;
+    display: flex;
+    padding: 0.35rem;
+    gap: 0.25rem;
+    border-radius: 99px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+    /* Fallback: always apply blur+saturate */
+    backdrop-filter: blur(30px) saturate(220%);
+    -webkit-backdrop-filter: blur(30px) saturate(220%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.45),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05),
+      0 8px 32px 0 rgba(44, 42, 41, 0.04);
+  }
+  [data-theme="dark"] .tab-switcher {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2),
+      0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+  .tab-btn {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  .tab-btn.active {
+    color: var(--color-accent);
+  }
+  .tab-icon {
+    width: 16px;
+    height: 16px;
+  }
+  .tab-slider {
+    position: absolute;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    z-index: 1;
+    background: var(--color-accent-bg);
+    border-radius: 99px;
+  }
+
+  /* Tab 内容控制 */
+  .tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .tab-content.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 本地存储留言提示区 */
+  .guestbook-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-sm);
+    color: #b45309;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  [data-theme="dark"] .guestbook-notice {
+    background: rgba(245, 158, 11, 0.04);
+    border-color: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+  }
+  .notice-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: currentColor;
+    stroke-width: 2.2px;
+  }
+
+  /* ==========================================
+     Tab 1: 留言墙样式
+     ========================================== */
+  .form-section {
+    padding: 1.8rem 2.2rem;
+    margin-bottom: 3rem;
+  }
+  .form-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .form-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    width: 100%;
+  }
+  .inputs-row {
+    flex-wrap: wrap;
+  }
+  .meta-row {
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .nickname-group {
+    width: 200px;
+    flex-shrink: 0;
+  }
+  .content-group {
+    flex: 1 1 350px;
+  }
+
+  .guestbook-form label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .guestbook-form input[type="text"] {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.25s ease;
+    font-family: var(--font-sans);
+  }
+  [data-theme="dark"] .guestbook-form input[type="text"] {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .guestbook-form input[type="text"]:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+  }
+
+  /* Emoji 心情选择器 */
+  .emoji-picker {
+    display: flex;
+    background: rgba(44, 42, 41, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem;
+    border-radius: var(--radius-sm);
+    gap: 0.15rem;
+  }
+  [data-theme="dark"] .emoji-picker {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .emoji-opt input[type="radio"] {
+    display: none;
+  }
+  .emoji-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    border-radius: calc(var(--radius-sm) - 2px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .emoji-opt input[type="radio"]:checked + .emoji-btn {
+    background: var(--card-bg);
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+  }
+  .emoji-picker-svg {
+    width: 14px;
+    height: 14px;
+    color: inherit;
+    display: block;
+    stroke-width: 2.2px;
+  }
+  .note-emoji-svg {
+    width: 15px;
+    height: 15px;
+    color: var(--color-accent);
+    display: block;
+  }
+
+  /* Color 便签颜色选择器 */
+  .color-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 38px;
+    padding: 0 0.5rem;
+  }
+  .color-opt input[type="radio"] {
+    display: none;
+  }
+  .color-dot {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .color-opt input[type="radio"]:checked + .color-dot {
+    transform: scale(1.25);
+    box-shadow: 0 0 0 2.5px var(--color-accent);
+  }
+  .color-1 .color-dot { background-color: #fef3c7; }
+  .color-2 .color-dot { background-color: #dcfce7; }
+  .color-3 .color-dot { background-color: #e0f2fe; }
+  .color-4 .color-dot { background-color: #f3e8ff; }
+  .color-5 .color-dot { background-color: #fee2e2; }
+
+  .form-action {
+    display: flex;
+  }
+  .form-submit-btn {
+    padding: 0.65rem 1.8rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 便签展示板 */
+  .guestbook-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  /* 便签卡片 */
+  .note-card {
+    position: relative;
+    padding: 2.2rem 1.8rem 1.5rem 1.8rem;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 180px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.4s ease;
+  }
+  .note-card:hover {
+    transform: translateY(-6px) rotate(-1deg);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* 便签表情贴纸（替换原图钉） */
+  .note-emoji-stamp {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    z-index: 2;
+    user-select: none;
+  }
+
+  .note-text {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    font-style: italic;
+  }
+  .note-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed rgba(44, 42, 41, 0.08);
+    padding-top: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  [data-theme="dark"] .note-meta {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .note-author {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  /* 便签微渐变背景 */
+  .note-color-yellow {
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.4) 0%, rgba(253, 230, 138, 0.2) 100%);
+    border-color: rgba(252, 211, 77, 0.3);
+  }
+  [data-theme="dark"] .note-color-yellow {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(217, 119, 6, 0.03) 100%);
+    border-color: rgba(251, 191, 36, 0.15);
+  }
+  
+  .note-color-green {
+    background: linear-gradient(135deg, rgba(220, 252, 231, 0.4) 0%, rgba(187, 247, 208, 0.2) 100%);
+    border-color: rgba(134, 239, 172, 0.3);
+  }
+  [data-theme="dark"] .note-color-green {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+    border-color: rgba(52, 211, 153, 0.15);
+  }
+  
+  .note-color-blue {
+    background: linear-gradient(135deg, rgba(224, 242, 254, 0.4) 0%, rgba(186, 230, 253, 0.2) 100%);
+    border-color: rgba(147, 197, 253, 0.3);
+  }
+  [data-theme="dark"] .note-color-blue {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
+    border-color: rgba(96, 165, 250, 0.15);
+  }
+  
+  .note-color-purple {
+    background: linear-gradient(135deg, rgba(243, 232, 255, 0.4) 0%, rgba(233, 213, 255, 0.2) 100%);
+    border-color: rgba(216, 180, 254, 0.3);
+  }
+  [data-theme="dark"] .note-color-purple {
+    background: linear-gradient(135deg, rgba(192, 132, 252, 0.08) 0%, rgba(124, 58, 237, 0.03) 100%);
+    border-color: rgba(192, 132, 252, 0.15);
+  }
+  
+  .note-color-red {
+    background: linear-gradient(135deg, rgba(254, 226, 226, 0.4) 0%, rgba(254, 202, 202, 0.2) 100%);
+    border-color: rgba(252, 165, 165, 0.3);
+  }
+  [data-theme="dark"] .note-color-red {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.08) 0%, rgba(220, 38, 38, 0.03) 100%);
+    border-color: rgba(248, 113, 113, 0.15);
+  }
+
+  /* 新建留言的入场动画 */
+  .note-card.is-new {
+    opacity: 0;
+    transform: scale(0.8) translateY(25px) rotate(-3deg);
+  }
+
+
+  /* ==========================================
+     Tab 2: 友情链接样式
+     ========================================== */
+  .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  /* 友链卡片 (Aura Hover Design) */
+  .friend-card {
+    position: relative;
+    display: block;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(44, 42, 41, 0.08);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    text-decoration: none;
+    overflow: visible;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+  }
+  [data-theme="dark"] .friend-card {
+    background: rgba(26, 26, 26, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .friend-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+    border-color: hsl(var(--aura-color, var(--hue)), 85%, 60%);
+  }
+
+  .friend-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* 专属色背景发光投影 (Aura Glow) */
+  .friend-aura {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 50%, hsla(var(--aura-color, var(--hue)), 80%, 60%, 0.12) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .friend-card:hover .friend-aura {
+    opacity: 1;
+  }
+
+  /* 头像流光特效 */
+  .friend-avatar-container {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .friend-avatar-container::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, hsl(var(--aura-color, var(--hue)), 85%, 60%) 0%, hsl(calc(var(--aura-color, var(--hue)) + 120), 85%, 60%) 100%);
+    z-index: 1;
+    opacity: 0.15;
+    transition: opacity 0.3s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .friend-card:hover .friend-avatar-container::after {
+    opacity: 1;
+    transform: rotate(180deg);
+  }
+
+  .friend-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--card-bg);
+    z-index: 2;
+    background: var(--card-bg);
+  }
+
+  .friend-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .friend-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.25rem;
+  }
+  .friend-arrow {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  }
+  .friend-card:hover .friend-arrow {
+    opacity: 1;
+    color: hsl(var(--aura-color, var(--hue)), 85%, 60%);
+    transform: translate(0, 0);
+  }
+
+  .friend-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  /* 交换友链申请表 */
+  .apply-section {
+    padding: 2.2rem;
+    margin-bottom: 2rem;
+  }
+  .apply-header {
+    border-bottom: 1px dashed rgba(44, 42, 41, 0.08);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  [data-theme="dark"] .apply-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+  .apply-title {
+    font-size: 1.5rem;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .apply-desc {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .apply-info-container {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+  .apply-info-list {
+    flex: 1 1 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .apply-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .info-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .info-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-main);
+  }
+  .info-value.select-all {
+    user-select: all;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+  }
+
+  .apply-copy-box {
+    flex: 1 1 350px;
+    display: flex;
+    flex-direction: column;
+  }
+  .copy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  .copy-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-bg);
+  }
+  .copy-icon {
+    width: 13px;
+    height: 13px;
+    margin-right: 4px;
+  }
+  
+  .code-block {
+    margin: 0;
+    background: rgba(44, 42, 41, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    font-family: var(--font-mono);
+    color: var(--text-main);
+    overflow-x: auto;
+  }
+  [data-theme="dark"] .code-block {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .apply-info-container {
+      gap: 2rem;
+    }
+  }
+  @media (max-width: 640px) {
+    .form-section {
+      padding: 1.25rem 1.5rem;
+    }
+    .form-row {
+      gap: 1rem;
+    }
+    .nickname-group {
+      width: 100%;
+    }
+    .emoji-picker-group,
+    .color-picker-group {
+      width: 100%;
+    }
+    .emoji-picker {
+      justify-content: space-between;
+    }
+    .color-picker {
+      padding: 0;
+    }
+    .form-action {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .form-submit-btn {
+      width: 100%;
+    }
+    .tab-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .apply-section {
+      padding: 1.5rem;
+    }
+  }
+</style>

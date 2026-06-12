@@ -1,0 +1,159 @@
+---
+import { SITE } from '../config';
+
+interface Props {
+  showBackLink?: boolean;
+  postCount?: number;
+}
+
+const { showBackLink = false, postCount } = Astro.props;
+---
+<div class="profile-card-container">
+  <div class="avatar-wrapper">
+    <img src="/images/avatar.webp" alt="博主头像" class="profile-avatar" />
+  </div>
+  <h3 class="profile-name">{SITE.author}</h3>
+  <span class="profile-badge">学生开发者 / Vibe Coder</span>
+  <p class="profile-bio">
+    记录日常代码、折腾笔记与生活观察。正在做的项目有 Blog（本站）和 LepoProxy。相信直觉，享受纯粹的写码快乐。
+  </p>
+  
+  {postCount !== undefined && (
+    <div class="profile-stats">
+      <div class="stat-item">
+        <span class="stat-num">{postCount}</span>
+        <span class="stat-label">已发布文章</span>
+      </div>
+    </div>
+  )}
+
+  <div class="profile-links">
+    <a href={SITE.github} target="_blank" rel="noopener noreferrer" class="profile-link-btn" title="GitHub">GitHub</a>
+    <a href={`mailto:${SITE.email}`} class="profile-link-btn" title="Email">Email</a>
+  </div>
+
+  {showBackLink && (
+    <a href="/" class="back-list-link">&larr; 返回首页</a>
+  )}
+</div>
+
+<style>
+  .profile-card-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    gap: 0.8rem;
+  }
+  .avatar-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .avatar-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, hsl(var(--hue), 85%, 60%) 0%, hsl(calc(var(--hue) + 120), 85%, 60%) 100%);
+    z-index: 1;
+    opacity: 0.15;
+    transition: opacity 0.3s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .profile-card-container:hover .avatar-wrapper::after {
+    opacity: 1;
+    transform: rotate(180deg);
+  }
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--card-bg);
+    object-fit: cover;
+    background: var(--card-bg);
+    z-index: 2;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+  .profile-card-container:hover .profile-avatar {
+    transform: scale(1.04);
+  }
+  .profile-name {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--text-main);
+  }
+  .profile-badge {
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+  }
+  .profile-bio {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .profile-stats {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.8rem;
+    margin-top: 0.2rem;
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    color: var(--text-main);
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .profile-links {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .profile-link-btn {
+    flex: 1;
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    color: var(--text-main);
+  }
+  .profile-link-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .back-list-link {
+    font-family: var(--font-serif);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 0.5rem;
+  }
+  .back-list-link:hover {
+    color: var(--color-accent);
+  }
+</style>

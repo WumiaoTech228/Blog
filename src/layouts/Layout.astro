@@ -1,0 +1,588 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import SeoMeta from '../components/SeoMeta.astro';
+import Footer from '../components/Footer.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import MusicPlayer from '../components/MusicPlayer.astro';
+import { ClientRouter } from 'astro:transitions';
+import { SITE } from '../config';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  articleDate?: string;
+  schema?: string;
+  tags?: string[];
+  robots?: string;
+}
+
+const { 
+  title, 
+  description = SITE.description, 
+  image = "/images/default-banner.webp",
+  articleDate,
+  schema,
+  robots,
+  tags = [],
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || SITE.url);
+const imageURL = new URL(image, canonicalURL);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="/scripts/theme.js" is:inline></script>
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="无渺" />
+    <link rel="icon" type="image/webp" href="/images/avatar.webp" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Preload critical fonts -->
+    <link rel="preload" as="font" href="/fonts/Outfit.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/fonts/NotoSerifSC.woff2" type="font/woff2" crossorigin />
+    <!-- Preload main CSS -->
+    <link rel="preload" as="style" href="/styles/global.css" />
+    <!-- Preload theme script -->
+    <link rel="preload" as="script" href="/scripts/theme.js" />
+    <link rel="search" type="application/opensearchdescription+xml" title="无渺 Blog" href="/opensearch.xml" />
+    <meta name="theme-color" content="#FAF8F5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)" />
+
+    <!-- 引入 Outfit 几何西文字体 & Noto Serif SC 中文宋体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <SeoMeta {...Astro.props} />
+    <ClientRouter />
+    {!schema && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": SITE.title,
+        "url": canonicalURL.toString(),
+        "description": description
+      })} is:inline />
+    )}
+    <script is:inline>
+      (function() {
+        const welcomePhrases = [
+          "✨ 欢迎光临本小站~ (´▽`ʃ♡ƪ)",
+          "🚀 哇，稀客！快快请进~",
+          "🍀 今天又是美好的一天，欢迎你！",
+          "☕ 欢迎光临，坐下喝杯茶吧~ (つ´ω`)つ",
+          "💡 捕捉到一位新游客！欢迎欢迎~"
+        ];
+        const leavePhrases = [
+          "😭 别走嘛，还会回来的对吧...",
+          "🥺 不要离开我呀~ (つ﹏⊂)",
+          "💤 网页在挂机，等你回来噢...",
+          "🎯 网页还在等你点亮呢...",
+          "🔒 悄悄守候你的归来..."
+        ];
+        const returnPhrases = [
+          "🎉 嘿！你终于回来了！(≧∇≦)ﾉ",
+          "❤️ 捉到你了！欢迎回家！",
+          "✨ 回来啦！继续快乐折腾~",
+          "🌟 亮起！你回来真好~ (〃'▽'〃)",
+          "☀️ 欢迎归航！今天开心喔~"
+        ];
+        let originalTitle = document.title;
+        let welcomeTimer = null;
+        const randWelcome = welcomePhrases[Math.floor(Math.random() * welcomePhrases.length)];
+        document.title = randWelcome;
+        welcomeTimer = setTimeout(() => {
+          document.title = originalTitle;
+        }, 1800);
+        function initTitleSwitcher() {
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+              if (welcomeTimer) clearTimeout(welcomeTimer);
+              const randLeave = leavePhrases[Math.floor(Math.random() * leavePhrases.length)];
+              document.title = randLeave;
+            } else {
+              if (welcomeTimer) clearTimeout(welcomeTimer);
+              const randReturn = returnPhrases[Math.floor(Math.random() * returnPhrases.length)];
+              document.title = randReturn;
+              welcomeTimer = setTimeout(() => {
+                document.title = originalTitle;
+              }, 1800);
+            }
+          });
+        }
+        document.addEventListener('astro:page-load', () => {
+          originalTitle = document.title;
+        });
+        initTitleSwitcher();
+      })();
+    </script>
+  </head>
+  <body>
+
+    <!-- 自定义弹性磁性光标 DOM -->
+    <div class="custom-cursor" id="custom-cursor-dot"></div>
+    <div class="custom-cursor-ring" id="custom-cursor-ring"></div>
+
+    <!-- 页面全局氛围光晕 (Aura Blobs) -->
+    <div class="aura-blob aura-blob-1" aria-hidden="true"></div>
+    <div class="aura-blob aura-blob-2" aria-hidden="true"></div>
+
+    <a href="#content" class="skip-link">跳到正文</a>
+    <!-- 引入统一导航组件 -->
+    <Header />
+
+    <main id="content" class="layout-main" tabindex="-1">
+      <slot />
+    </main>
+
+    <!-- 引入统一页脚组件 -->
+    <Footer />
+
+    <!-- 全局控制面板与微型播放器 -->
+    <CommandPalette />
+    <MusicPlayer />
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="back-to-top" aria-label="回到顶部" title="回到顶部">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15" />
+      </svg>
+    </button>
+
+    <script>
+      // ==========================================
+      // 全局五彩纸屑粒子特效 (Canvas Confetti)
+      // ==========================================
+      window.triggerConfetti = function(x: number, y: number, customColors?: string[]) {
+        // Reuse or remove any existing confetti canvas to prevent accumulation
+        const existing = document.getElementById('confetti-canvas');
+        if (existing) existing.remove();
+        const resizes: (() => void)[] = [];
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'confetti-canvas';
+        canvas.style.position = 'fixed';
+        canvas.style.left = '0';
+        canvas.style.top = '0';
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '99999';
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+        resizes.push(() => window.removeEventListener('resize', handleResize));
+
+        interface Particle {
+          x: number;
+          y: number;
+          size: number;
+          color: string;
+          vx: number;
+          vy: number;
+          rotation: number;
+          rotationSpeed: number;
+          opacity: number;
+        }
+
+        const particles: Particle[] = [];
+        const colors = customColors || ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+        for (let i = 0; i < 75; i++) {
+          particles.push({
+            x,
+            y,
+            size: Math.random() * 8 + 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            vx: (Math.random() - 0.5) * 14,
+            vy: (Math.random() - 0.7) * 14 - 3, // burst upwards
+            rotation: Math.random() * 360,
+            rotationSpeed: (Math.random() - 0.5) * 8,
+            opacity: 1
+          });
+        }
+
+        function update() {
+          if (!ctx) return;
+          ctx.clearRect(0, 0, width, height);
+
+          let active = false;
+          particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.35; // gravity
+            p.vx *= 0.98; // air drag
+            p.vy *= 0.98;
+            p.rotation += p.rotationSpeed;
+            p.opacity -= 0.015;
+
+            if (p.opacity > 0) {
+              active = true;
+              ctx.save();
+              ctx.translate(p.x, p.y);
+              ctx.rotate(p.rotation * Math.PI / 180);
+              ctx.globalAlpha = p.opacity;
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+              ctx.restore();
+            }
+          });
+
+          if (active) {
+            requestAnimationFrame(update);
+          } else {
+            resizes.forEach(fn => fn());
+            canvas.remove();
+          }
+        }
+
+        update();
+      };
+
+      function updateBackToTop() {
+        const btn = document.getElementById('back-to-top');
+        if (!btn) return;
+        if (window.scrollY > 400) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+      }
+
+      // ==========================================
+      // 自定义弹性磁性光标跟随与交互逻辑
+      // ==========================================
+      let mouseX = 0;
+      let mouseY = 0;
+      let ringX = 0;
+      let ringY = 0;
+
+      const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      let dot: HTMLElement | null = null;
+      let ring: HTMLElement | null = null;
+      let isCursorActive = false;
+
+      function getCursor() {
+        if (!dot || !dot.isConnected) {
+          dot = document.getElementById('custom-cursor-dot');
+        }
+        if (!ring || !ring.isConnected) {
+          ring = document.getElementById('custom-cursor-ring');
+        }
+        return { dot, ring };
+      }
+
+      function updateCursorElements() {
+        const { dot: activeDot, ring: activeRing } = getCursor();
+        if (isCursorActive && document.body) {
+          document.body.classList.add('custom-cursor-active');
+          if (activeDot) {
+            activeDot.style.opacity = '1';
+            activeDot.style.left = mouseX + 'px';
+            activeDot.style.top = mouseY + 'px';
+          }
+          if (activeRing) {
+            activeRing.style.opacity = '1';
+          }
+          
+          // Check if there is an interactive element under the cursor on page change
+          const element = document.elementFromPoint(mouseX, mouseY);
+          if (element && element.closest('a, button, select, input, textarea, [role="button"], .tag-cloud-item, .project-card-item, .scroll-link, .back-to-top')) {
+            activeDot?.classList.add('hovered');
+            activeRing?.classList.add('hovered');
+          } else {
+            activeDot?.classList.remove('hovered');
+            activeRing?.classList.remove('hovered');
+          }
+        }
+      }
+
+      function animateRing() {
+        const delay = 5; // 阻尼系数
+        ringX += (mouseX - ringX) / delay;
+        ringY += (mouseY - ringY) / delay;
+        const { ring: activeRing } = getCursor();
+        if (activeRing) {
+          activeRing.style.left = ringX + 'px';
+          activeRing.style.top = ringY + 'px';
+        }
+        requestAnimationFrame(animateRing);
+      }
+
+      // Check window-level initialization flag to avoid duplicate bindings
+      if (!(window as any).__layoutScriptsInitialized) {
+        (window as any).__layoutScriptsInitialized = true;
+
+        // 1. Back to top button registration
+        window.addEventListener('scroll', updateBackToTop, { passive: true });
+
+        document.addEventListener('click', (e) => {
+          const btn = (e.target as HTMLElement).closest('#back-to-top');
+          if (btn) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+
+        // 2. Cursor registration
+        if (hasHover) {
+          document.addEventListener('astro:after-swap', updateCursorElements);
+          document.addEventListener('astro:page-load', updateCursorElements);
+
+          window.addEventListener('mousemove', (e) => {
+            isCursorActive = true;
+            document.body.classList.add('custom-cursor-active');
+            const { dot: activeDot, ring: activeRing } = getCursor();
+            if (activeDot) {
+              activeDot.style.opacity = '1';
+              activeDot.style.left = e.clientX + 'px';
+              activeDot.style.top = e.clientY + 'px';
+            }
+            if (activeRing) {
+              activeRing.style.opacity = '1';
+            }
+
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+          });
+
+          // 当鼠标移出浏览器视口时，隐藏自定义光标并恢复默认光标
+          document.addEventListener('mouseleave', () => {
+            const { dot: activeDot, ring: activeRing } = getCursor();
+            if (activeDot) activeDot.style.opacity = '0';
+            if (activeRing) activeRing.style.opacity = '0';
+          });
+
+          // 当鼠标重新进入视口且光标已激活时，重新显示自定义光标
+          document.addEventListener('mouseenter', () => {
+            if (isCursorActive) {
+              const { dot: activeDot, ring: activeRing } = getCursor();
+              if (activeDot) activeDot.style.opacity = '1';
+              if (activeRing) activeRing.style.opacity = '1';
+            }
+          });
+
+          animateRing();
+
+          // 使用全局事件委托绑定 hover 交互状态，避免每次 astro:page-load 时的监听器累积
+          document.addEventListener('mouseover', (e) => {
+            const target = e.target as HTMLElement | null;
+            if (target && target.closest('a, button, select, input, textarea, [role="button"], .tag-cloud-item, .project-card-item, .scroll-link, .back-to-top')) {
+              const { dot: activeDot, ring: activeRing } = getCursor();
+              activeDot?.classList.add('hovered');
+              activeRing?.classList.add('hovered');
+            }
+          });
+
+          document.addEventListener('mouseout', (e) => {
+            const target = e.target as HTMLElement | null;
+            if (target && target.closest('a, button, select, input, textarea, [role="button"], .tag-cloud-item, .project-card-item, .scroll-link, .back-to-top')) {
+              const { dot: activeDot, ring: activeRing } = getCursor();
+              activeDot?.classList.remove('hovered');
+              activeRing?.classList.remove('hovered');
+            }
+          });
+        }
+
+        // Initialize on load and on transition
+        document.addEventListener('astro:page-load', () => {
+          updateBackToTop();
+        });
+      }
+    </script>
+
+    <style>
+      .layout-main {
+        min-height: 75vh;
+        padding: 3rem 0 5rem 0;
+        animation: fadeIn 0.4s ease-out;
+      }
+      .skip-link {
+        position: fixed;
+        top: 0.75rem;
+        left: 0.75rem;
+        z-index: 1000;
+        transform: translateY(-150%);
+        background: var(--card-bg);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.75rem;
+        box-shadow: var(--shadow-md);
+      }
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+      .layout-main:focus {
+        outline: none;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .back-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 200;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease, border-color 0.2s ease;
+        pointer-events: none;
+        box-shadow: var(--shadow-md);
+      }
+      .back-to-top.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .back-to-top:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+      }
+      .back-to-top svg {
+        width: 20px;
+        height: 20px;
+      }
+      @media (max-width: 640px) {
+        .back-to-top {
+          bottom: 1rem;
+          right: 1rem;
+          width: 38px;
+          height: 38px;
+        }
+      }
+
+      /* 氛围渐变光晕 (Aura Blobs) - 跟随 HSL 主题色相动态变化 */
+      .aura-blob {
+        position: fixed;
+        width: 45vw;
+        height: 45vw;
+        min-width: 300px;
+        min-height: 300px;
+        border-radius: 50%;
+        filter: blur(130px);
+        opacity: 0.12;
+        z-index: -1;
+        pointer-events: none;
+        transition: background-color 0.8s ease, opacity 0.8s ease;
+        mix-blend-mode: normal;
+      }
+      [data-theme="dark"] .aura-blob {
+        opacity: 0.05;
+      }
+      .aura-blob-1 {
+        top: -10%;
+        left: -10%;
+        background-color: hsl(var(--hue), 40%, 85%);
+        animation: floatBlob1 25s infinite alternate ease-in-out;
+      }
+      [data-theme="dark"] .aura-blob-1 {
+        background-color: hsl(var(--hue), 30%, 20%);
+      }
+      .aura-blob-2 {
+        bottom: -5%;
+        right: -10%;
+        /* 使用互补色相偏移 (hue + 120) 增加视觉层次 */
+        background-color: hsl(calc(var(--hue) + 120), 35%, 85%);
+        animation: floatBlob2 30s infinite alternate ease-in-out;
+      }
+      [data-theme="dark"] .aura-blob-2 {
+        background-color: hsl(calc(var(--hue) + 120), 25%, 18%);
+      }
+
+      @keyframes floatBlob1 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(8vw, 6vh) scale(1.1); }
+        100% { transform: translate(-4vw, 10vh) scale(0.9); }
+      }
+      @keyframes floatBlob2 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-10vw, -8vh) scale(0.95); }
+        100% { transform: translate(6vw, 4vh) scale(1.15); }
+      }
+    </style>
+
+    <!-- SVG Refraction Filter for Premium Crystal Glassmorphism -->
+    <svg width="0" height="0" style="position: absolute; pointer-events: none;" aria-hidden="true">
+      <defs>
+        <filter id="crystal-refraction" filterUnits="userSpaceOnUse" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+          <!-- 1. Extract the alpha channel of the clipped backdrop (the element shape) -->
+          <feSourceAlpha result="alpha" />
+          
+          <!-- 2. Blur the alpha channel to create a smooth slope at the boundaries -->
+          <feGaussianBlur in="alpha" stdDeviation="5" result="blurred" />
+          
+          <!-- 3. Horizontal Sobel derivative (dx) with 0.5 bias -->
+          <feConvolveMatrix in="blurred" order="3"
+            kernelMatrix="
+              -1 0 1
+              -2 0 2
+              -1 0 1"
+            bias="0.5" divisor="4" edgeMode="duplicate" result="dx" />
+            
+          <!-- 4. Vertical Sobel derivative (dy) with 0.5 bias -->
+          <feConvolveMatrix in="blurred" order="3"
+            kernelMatrix="
+              -1 -2 -1
+               0  0  0
+               1  2  1"
+            bias="0.5" divisor="4" edgeMode="duplicate" result="dy" />
+            
+          <!-- 5. Isolate Red channel in dx -->
+          <feColorMatrix in="dx" type="matrix"
+            values="
+              1 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 1" result="red-channel" />
+              
+          <!-- 6. Isolate Green channel in dy -->
+          <feColorMatrix in="dy" type="matrix"
+            values="
+              0 0 0 0 0
+              0 1 0 0 0
+              0 0 0 0 0
+              0 0 0 0 1" result="green-channel" />
+              
+          <!-- 7. Add dx and dy to construct the R=dx, G=dy displacement map -->
+          <feComposite in="red-channel" in2="green-channel" operator="arithmetic" k2="1" k3="1" result="displacement-map" />
+          
+          <!-- 8. Warp the backdrop under the element using the displacement map -->
+          <feDisplacementMap in="SourceGraphic" in2="displacement-map" scale="18"
+            xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+  </body>
+</html>
+

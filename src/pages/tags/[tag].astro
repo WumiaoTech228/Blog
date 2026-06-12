@@ -1,0 +1,112 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { slugifyTag } from '../../utils/tag';
+import { SITE } from '../../config';
+import { getPostReadingTime, getPostSlug, getPublishedPosts } from '../../utils/posts';
+
+// 1. 生成所有标签的静态路径
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  const activePosts = getPublishedPosts(allPosts);
+  
+  // 使用 Map 按 slug 规范化合并相同/相似标签
+  const tagGroups = new Map<string, { originalName: string; posts: typeof activePosts }>();
+
+  for (const post of activePosts) {
+    const tags = post.data.tags || [];
+    for (const tag of tags) {
+      const slug = slugifyTag(tag);
+      if (!slug) continue;
+
+      if (!tagGroups.has(slug)) {
+        tagGroups.set(slug, {
+          originalName: tag, // 默认使用第一次遇到的原名展示
+          posts: []
+        });
+      }
+      tagGroups.get(slug)!.posts.push(post);
+    }
+  }
+
+  return Array.from(tagGroups.entries()).map(([slug, { originalName, posts }]) => {
+    return {
+      params: { tag: slug },
+      props: { 
+        tagName: originalName,
+        posts,
+      },
+    };
+  });
+}
+
+const { posts, tagName } = Astro.props;
+---
+
+<Layout title={`标签: ${tagName} - ${SITE.title}`} description={`包含标签「${tagName}」的文章列表。`} robots="noindex">
+  <div class="tag-layout container">
+    <header class="tag-header">
+      <a href="/archive/" class="back-link">&larr; 归档与标签</a>
+      <h1 class="tag-title">
+        标签: <span class="tag-highlight">#{tagName}</span>
+      </h1>
+      <p class="tag-count">共找到 {posts.length} 篇文章</p>
+    </header>
+
+    <main class="tag-posts-list">
+      {posts.map(post => {
+        const slug = getPostSlug(post);
+        return (
+          <PostCard 
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            slug={slug}
+            readingTime={getPostReadingTime(post)}
+            tags={post.data.tags}
+          />
+        );
+      })}
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .tag-layout {
+    max-width: 760px;
+    padding-top: 5.5rem;
+  }
+  .tag-header {
+    margin-bottom: 3rem;
+  }
+  .back-link {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .back-link:hover {
+    color: var(--text-main);
+  }
+  .tag-title {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .tag-highlight {
+    color: var(--color-accent);
+  }
+  .tag-count {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+  .tag-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+</style>
+
