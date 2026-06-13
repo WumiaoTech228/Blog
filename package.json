@@ -25,6 +25,7 @@
     "@keystatic/astro": "^5.1.0",
     "@keystatic/core": "^0.5.50",
     "astro": "^6.4.4",
+    "lunar-javascript": "^1.7.7",
     "typescript": "^6.0.3",
     "zod": "^3.25.76"
   }
