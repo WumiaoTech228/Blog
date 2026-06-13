@@ -33,15 +33,13 @@
 
     let isFetching = false;
 
-    // 博主精选语录库（包含真正由“无渺”说的话，以及精选技术、折腾语录）
-    const wumiaoQuotes = [
-      { text: "理想主义者如果同时也是个行动派，那他就拥有了改变世界的钥匙。", author: "无渺" },
-      { text: "相信直觉，享受纯粹的写码快乐。", author: "无渺" },
-      { text: "代码是写给人看的，顺便给机器运行一下。", author: "无渺" },
-      { text: "折腾是一种生活态度，折腾至死，方得始终。", author: "无渺" },
-      { text: "凡是可以用 JavaScript 重写的，最终都会被 JavaScript 重写。", author: "Atwood's Law" },
-      { text: "生命就像一个不断编译的程序，有 Bug，但一直在迭代运行。", author: "无渺" },
-      { text: "在必应和搜索引擎中搜出自己的名字，大概是每个 Vibe Coder 奇妙的里程碑吧。", author: "无渺" }
+    // 精选开发者与世界名言库 (作为接口被屏蔽时的备用方案，不包含博主的话)
+    const genericQuotes = [
+      { text: "代码是写给人看的，顺便给机器运行一下。", author: "Abelson & Sussman" },
+      { text: "凡是可以用 JavaScript 重写的，最终都会被 JavaScript 重写。", author: "Jeff Atwood" },
+      { text: "世界上只有两种编程语言：一种是天天被人骂的，一种是没人用的。", author: "Bjarne Stroustrup" },
+      { text: "简单就是最终的复杂。", author: "达芬奇" },
+      { text: "生命就像一个不断编译的程序，有 Bug，但一直在迭代运行。", author: "佚名" }
     ];
 
     async function fetchHitokoto() {
@@ -49,39 +47,26 @@
       isFetching = true;
       refreshBtn!.classList.add('spinning');
       
-      // 50% 概率展示博主“无渺”自己的原话/精选折腾语录；50% 概率拉取网络名言
-      const showLocal = Math.random() > 0.5;
-
-      if (showLocal) {
-        const randomQuote = wumiaoQuotes[Math.floor(Math.random() * wumiaoQuotes.length)];
+      try {
+        // 全量拉取公开的文学/动漫/原创名句
+        const response = await fetch('https://v1.hitokoto.cn/?c=a&c=b&c=c&c=d&c=h&c=i');
+        if (response.ok) {
+          const data = await response.json();
+          textEl!.textContent = data.hitokoto;
+          fromEl!.textContent = data.from_who ? `—— 「${data.from_who}」 · 《${data.from}》` : `—— 《${data.from}》`;
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
+        // 接口异常时退回到通用开发者/科学名句
+        const randomQuote = genericQuotes[Math.floor(Math.random() * genericQuotes.length)];
+        textEl!.textContent = randomQuote.text;
+        fromEl!.textContent = `—— 「${randomQuote.author}」`;
+      } finally {
         setTimeout(() => {
-          textEl!.textContent = randomQuote.text;
-          fromEl!.textContent = `—— 「${randomQuote.author}」`;
           refreshBtn!.classList.remove('spinning');
           isFetching = false;
-        }, 300);
-      } else {
-        try {
-          // 拉取公开的名句
-          const response = await fetch('https://v1.hitokoto.cn/?c=a&c=b&c=c&c=d&c=h&c=i');
-          if (response.ok) {
-            const data = await response.json();
-            textEl!.textContent = data.hitokoto;
-            fromEl!.textContent = data.from_who ? `—— 「${data.from_who}」 · 《${data.from}》` : `—— 《${data.from}》`;
-          } else {
-            throw new Error();
-          }
-        } catch (err) {
-          // 接口超时/被CSP阻止时 fallback 到本地精选
-          const randomQuote = wumiaoQuotes[Math.floor(Math.random() * wumiaoQuotes.length)];
-          textEl!.textContent = randomQuote.text;
-          fromEl!.textContent = `—— 「${randomQuote.author}」`;
-        } finally {
-          setTimeout(() => {
-            refreshBtn!.classList.remove('spinning');
-            isFetching = false;
-          }, 600); // 旋转动画最短保持时间
-        }
+        }, 600); // 旋转动画最短保持时间
       }
     }
 
