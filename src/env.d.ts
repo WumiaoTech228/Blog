@@ -7,6 +7,7 @@ type R2Bucket = import("@cloudflare/workers-types").R2Bucket;
 
 declare namespace App {
   interface Locals {
+    cspNonce?: string;
     runtime: {
       env: {
         KEYSTATIC_GITHUB_REPO?: string;
@@ -17,4 +18,12 @@ declare namespace App {
 
 interface Window {
   triggerConfetti?: (x: number, y: number, customColors?: string[]) => void;
+}
+
+declare module "cloudflare:workers" {
+  const env: {
+    GUESTBOOK_KV?: import("@cloudflare/workers-types").KVNamespace;
+    [key: string]: any;
+  };
+  export { env };
 }

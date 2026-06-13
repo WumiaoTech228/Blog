@@ -490,24 +490,117 @@ section {
 /* ==========================================
    代码块语言标签
    ========================================== */
-.prose pre {
+/* ==========================================
+   Mac 风格代码块容器与横向滚动条定制
+   ========================================== */
+.code-block-wrapper {
+  margin: 2rem 0;
+  background: #161617;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
   position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.prose pre .code-lang-label {
+
+[data-theme="dark"] .code-block-wrapper {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.code-block-wrapper:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: #1e1e20;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+  user-select: none;
+}
+
+.code-block-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.code-block-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.code-block-dots .dot-red { background: #ff5f56; }
+.code-block-dots .dot-yellow { background: #ffbd2e; }
+.code-block-dots .dot-green { background: #27c93f; }
+
+.code-block-lang-center {
   position: absolute;
-  top: 0;
-  left: 1rem;
-  padding: 0.15rem 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-sans);
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 0 0 6px 6px;
-  line-height: 1.6;
-  pointer-events: none;
+}
+
+.code-block-copy-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-family: var(--font-sans);
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.code-block-copy-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.code-block-copy-btn.copied {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-bg);
+}
+
+/* 覆盖 .prose 默认的 pre 样式以适配容器 */
+.prose .code-block-wrapper pre {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 1.2rem 1.4rem !important;
+  overflow-x: auto;
+  background: transparent !important;
+}
+
+/* 代码横向滚动条定制 */
+.prose .code-block-wrapper pre::-webkit-scrollbar {
+  height: 5px;
+}
+.prose .code-block-wrapper pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.prose .code-block-wrapper pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  transition: background-color 0.2s ease;
+}
+.prose .code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
 }
 
 /* ==========================================

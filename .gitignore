@@ -22,3 +22,9 @@ pnpm-debug.log*
 .wrangler/
 # OS metadata
 Thumbs.db
+
+# Cache and local tools
+.codegraph/
+.reasonix/
+/touxiang.png
+reasonix.toml

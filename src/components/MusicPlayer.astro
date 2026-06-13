@@ -146,6 +146,7 @@
   const activeTracks: Track[] = [...DEFAULT_TRACKS];
 
   let consecutiveErrors = 0;
+  let isDraggingProgress = false;
 
 
   function getAudioElements() {
@@ -429,11 +430,33 @@
     });
 
     // Progress Slider handler
+    progressSlider?.addEventListener('mousedown', () => {
+      isDraggingProgress = true;
+    });
+    progressSlider?.addEventListener('touchstart', () => {
+      isDraggingProgress = true;
+    });
+
     progressSlider?.addEventListener('input', () => {
       if (!audio.duration) return;
+      isDraggingProgress = true;
       const pct = parseFloat(progressSlider.value) / 100;
-      audio.currentTime = audio.duration * pct;
+      if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.duration * pct);
     });
+
+    const stopDrag = () => {
+      if (isDraggingProgress) {
+        isDraggingProgress = false;
+        if (progressSlider && audio && audio.duration) {
+          const pct = parseFloat(progressSlider.value) / 100;
+          audio.currentTime = audio.duration * pct;
+        }
+      }
+    };
+
+    progressSlider?.addEventListener('change', stopDrag);
+    progressSlider?.addEventListener('mouseup', stopDrag);
+    progressSlider?.addEventListener('touchend', stopDrag);
 
     // Click outside to collapse
     document.addEventListener('click', (e) => {
@@ -479,10 +502,10 @@
     });
 
     audio.addEventListener('timeupdate', () => {
-      if (!audio.duration) return;
+      if (!audio.duration || isDraggingProgress) return;
       const current = audio.currentTime;
       const duration = audio.duration;
-      if (progressSlider && document.activeElement !== progressSlider) {
+      if (progressSlider) {
         progressSlider.value = ((current / duration) * 100).toString();
       }
       if (currentTimeEl) currentTimeEl.textContent = formatTime(current);

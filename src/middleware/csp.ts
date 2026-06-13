@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from 'astro';
 import { randomBytes } from 'crypto';
 import { generateCSP } from '../utils/security';
 
-export const onRequest: MiddlewareHandler = async ({ request, locals }, next) => {
+export const onRequest: MiddlewareHandler = async ({ locals }, next) => {
   const nonce = randomBytes(16).toString('base64');
   // Store nonce for use in pages/components
   locals.cspNonce = nonce;

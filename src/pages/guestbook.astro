@@ -4,11 +4,11 @@ import ScrollReveal from '../components/ScrollReveal.astro';
 import { SITE } from '../config';
 ---
 
-<Layout title={`互动空间 - ${SITE.title}`} description="浏览友情链接以进行交流，或者在留言板下留下你的足迹。">
+<Layout title={`友情链接 - ${SITE.title}`} description="浏览友情链接以进行交流，或者在留言板下留下你的足迹。">
   <div class="guestbook-layout container">
     <header class="guestbook-header">
       <ScrollReveal animation="fade-up" delay={0}>
-        <h1 class="guestbook-title">互动空间</h1>
+        <h1 class="guestbook-title">友情链接</h1>
       </ScrollReveal>
       <ScrollReveal animation="fade-up" delay={80}>
         <p class="guestbook-subtitle">探索本站的友情链接以相互交流，或者在留言墙留下你的足迹。留言保存在本地浏览器中。</p>
@@ -53,7 +53,7 @@ import { SITE } from '../config';
         <section class="glass-card apply-section">
           <div class="apply-header">
             <h2 class="apply-title">申请交换友链</h2>
-            <p class="apply-desc">欢迎优秀的个人博客或技术站点交换链接。请先在贵站添加本站信息，并在留言墙留言或通过邮件告知，我会在第一时间添加。</p>
+            <p class="apply-desc">欢迎优秀的个人博客或技术站点交换链接。请先在贵站添加本站信息，然后直接将您的站点信息发送至邮箱 <a href="mailto:feedback@110228.xyz" class="mail-link">feedback@110228.xyz</a>，我会在 7 个工作日内处理完毕并添加。</p>
           </div>
           
           <div class="apply-info-container">
@@ -68,7 +68,7 @@ import { SITE } from '../config';
               </div>
               <div class="apply-info-item">
                 <span class="info-label">头像链接</span>
-                <span class="info-value select-all">https://blog.110228.xyz/images/avatar.webp</span>
+                <span class="info-value select-all">https://blog.110228.xyz/images/touxiang.png</span>
               </div>
               <div class="apply-info-item">
                 <span class="info-label">站点简介</span>
@@ -90,7 +90,7 @@ import { SITE } from '../config';
               <pre class="code-block"><code id="friend-json-code">{`{
   "name": "无渺",
   "url": "https://blog.110228.xyz",
-  "avatar": "https://blog.110228.xyz/images/avatar.webp",
+  "avatar": "https://blog.110228.xyz/images/touxiang.png",
   "description": "宇宙的边缘，代码的温床。"
 }`}</code></pre>
             </div>
@@ -282,9 +282,23 @@ import { SITE } from '../config';
     {
       name: "无渺 Space",
       url: "https://blog.110228.xyz",
-      avatar: "/images/avatar.webp",
+      avatar: "/images/touxiang.png",
       description: "宇宙的边缘，代码的温床。本站主站。",
       themeColor: "var(--hue)"
+    },
+    {
+      name: "apanzinc",
+      url: "https://apanzinc.top/",
+      avatar: "https://github.com/apanzinc.png",
+      description: "热爱探索的前端开发者，正在不断学习与成长。",
+      themeColor: "190"
+    },
+    {
+      name: "OSBox",
+      url: "https://osbox.top/",
+      avatar: "https://assets.osbox.top/images/favicon.png",
+      description: "精简系统镜像、装机 PE 工具与实用软件分享平台。",
+      themeColor: "215"
     }
   ];
 
@@ -356,7 +370,7 @@ import { SITE } from '../config';
         <div class="friend-aura"></div>
         <div class="friend-card-inner">
           <div class="friend-avatar-container">
-            <img src="${friend.avatar}" alt="${friend.name} 头像" class="friend-avatar" loading="lazy" onerror="this.src='/images/avatar.webp'" />
+            <img src="${friend.avatar}" alt="${friend.name} 头像" class="friend-avatar" loading="lazy" onerror="this.src='/images/touxiang.png'" />
           </div>
           <div class="friend-info">
             <h3 class="friend-name">
@@ -456,10 +470,35 @@ import { SITE } from '../config';
     const form = document.getElementById('guestbook-form') as HTMLFormElement | null;
     
     if (board && form) {
-      let messages = getSavedMessages();
-      board.innerHTML = messages.map(msg => createCardHTML(msg)).join('');
+      let messages: Message[] = [];
+      let isKVEnabled = false;
 
-      form.addEventListener('submit', (e) => {
+      // Render local messages immediately as placeholder/skeleton
+      const localMessages = getSavedMessages();
+      board.innerHTML = localMessages.map(msg => createCardHTML(msg)).join('');
+
+      // Attempt to load from Cloudflare KV backend API
+      const loadKVMessages = async () => {
+        try {
+          const res = await fetch('/api/messages');
+          if (res.ok) {
+            messages = await res.json();
+            isKVEnabled = true;
+            board.innerHTML = messages.map(msg => createCardHTML(msg)).join('');
+            console.log('[Guestbook] Loaded messages successfully from Cloudflare KV.');
+          } else {
+            console.warn('[Guestbook] KV API returned error status, falling back to LocalStorage.');
+            messages = localMessages;
+          }
+        } catch (err) {
+          console.warn('[Guestbook] Failed to connect to KV API (local dev or offline), falling back to LocalStorage.', err);
+          messages = localMessages;
+        }
+      };
+
+      loadKVMessages();
+
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const nicknameInput = document.getElementById('gb-nickname') as HTMLInputElement;
@@ -474,20 +513,45 @@ import { SITE } from '../config';
 
         if (!nickname || !content) return;
 
+        const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (submitBtn) submitBtn.disabled = true;
+
         const now = new Date();
         const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         
-        const newMsg: Message = {
-          id: Date.now().toString(),
-          nickname,
-          content,
-          date: dateStr,
-          colorIndex,
-          emoji
-        };
+        const payload = { nickname, content, emoji, colorIndex };
+        let newMsg: Message | null = null;
 
-        messages.unshift(newMsg);
-        saveMessages(messages);
+        if (isKVEnabled) {
+          try {
+            const res = await fetch('/api/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+              newMsg = await res.json();
+            } else {
+              console.error('[Guestbook] KV POST failed, falling back to LocalStorage.');
+            }
+          } catch (err) {
+            console.error('[Guestbook] KV POST failed with exception, falling back to LocalStorage.', err);
+          }
+        }
+
+        // Fallback to LocalStorage if KV was disabled or post failed
+        if (!newMsg) {
+          newMsg = {
+            id: Date.now().toString(),
+            nickname,
+            content,
+            date: dateStr,
+            colorIndex,
+            emoji
+          };
+          messages.unshift(newMsg);
+          saveMessages(messages);
+        }
 
         // Render card with entry transition
         const tempDiv = document.createElement('div');
@@ -502,9 +566,9 @@ import { SITE } from '../config';
         cardEl.classList.remove('is-new');
 
         form.reset();
+        if (submitBtn) submitBtn.disabled = false;
 
         // Trigger confetti particle effect
-        const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
         if (submitBtn && window.triggerConfetti) {
           const rect = submitBtn.getBoundingClientRect();
           window.triggerConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
@@ -1078,9 +1142,14 @@ import { SITE } from '../config';
   .friend-desc {
     font-size: 0.8rem;
     color: var(--text-muted);
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: normal;
+    word-break: break-all;
+    height: 2.9rem;
   }
 
   /* 交换友链申请表 */
@@ -1106,6 +1175,16 @@ import { SITE } from '../config';
     font-size: 0.92rem;
     color: var(--text-muted);
     line-height: 1.6;
+  }
+  .mail-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+  }
+  .mail-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
   }
 
   .apply-info-container {

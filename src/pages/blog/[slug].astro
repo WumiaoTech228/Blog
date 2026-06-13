@@ -544,21 +544,76 @@ const jsonLdSchema = JSON.stringify({
   }
 
   // ==========================================
-  // 代码块语言标签
+  // Mac 风格代码块及复制按钮统一初始化
   // ==========================================
-  function initCodeLangLabels() {
-    document.querySelectorAll('.prose pre code').forEach((code) => {
-      const pre = code.parentElement;
-      if (!pre || pre.querySelector('.code-lang-label')) return;
-      // Extract language from class (e.g. 'language-js' -> 'js')
+  function initCodeBlocks() {
+    document.querySelectorAll('.prose pre').forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-block-wrapper')) return;
+      
+      const code = pre.querySelector('code');
+      if (!code) return;
+
+      let lang = 'code';
       const langClass = Array.from(code.classList).find(c => c.startsWith('language-'));
-      if (!langClass) return;
-      const lang = langClass.replace('language-', '');
-      if (!lang || lang === 'plaintext') return;
-      const label = document.createElement('span');
-      label.className = 'code-lang-label';
-      label.textContent = lang;
-      pre.appendChild(label);
+      if (langClass) {
+        lang = langClass.replace('language-', '');
+      }
+      if (lang === 'plaintext') lang = 'text';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+
+      const header = document.createElement('div');
+      header.className = 'code-block-header';
+      header.innerHTML = `
+        <div class="code-block-dots">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <span class="code-block-lang-center">${lang}</span>
+      `;
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'code-block-copy-btn';
+      copyBtn.textContent = '复制';
+      copyBtn.setAttribute('aria-label', '复制代码');
+      copyBtn.addEventListener('click', () => {
+        const text = code.textContent || '';
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = '已复制';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+              copyBtn.textContent = '复制';
+              copyBtn.classList.remove('copied');
+            }, 2000);
+          }, () => {
+            copyBtn.textContent = '失败';
+          });
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          copyBtn.textContent = '已复制';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = '复制';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        }
+      });
+
+      header.appendChild(copyBtn);
+
+      pre.parentNode?.insertBefore(wrapper, pre);
+      wrapper.appendChild(header);
+      wrapper.appendChild(pre);
     });
   }
 
@@ -630,40 +685,7 @@ const jsonLdSchema = JSON.stringify({
       return;
     }
 
-    // 1. Copy button for code blocks
-    document.querySelectorAll(".prose pre").forEach(function (pre) {
-      if (pre.querySelector(".code-copy-btn")) return; // Prevent duplicates
-
-      var btn = document.createElement("button");
-      btn.className = "code-copy-btn";
-      btn.textContent = "复制";
-      btn.setAttribute("aria-label", "复制代码");
-      btn.addEventListener("click", function () {
-        var code = pre.querySelector("code");
-        if (!code) return;
-        var text = code.textContent || "";
-        // 使用 Clipboard API，在不安全的 HTTP 上下文时降级到 execCommand
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text).then(function () {
-            btn.textContent = "已复制";
-            setTimeout(function () { btn.textContent = "复制"; }, 2000);
-          }, function () { btn.textContent = "失败"; });
-        } else {
-          // HTTP fallback
-          var textarea = document.createElement("textarea");
-          textarea.value = text;
-          textarea.style.position = "fixed";
-          textarea.style.opacity = "0";
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          document.body.removeChild(textarea);
-          btn.textContent = "已复制";
-          setTimeout(function () { btn.textContent = "复制"; }, 2000);
-        }
-      });
-      pre.appendChild(btn);
-    });
+    // 1. Code blocks are initialized below in item 4
 
     // 2. Reading progress bar initialization
     var bar = document.getElementById("reading-progress");
@@ -683,8 +705,8 @@ const jsonLdSchema = JSON.stringify({
     // 3. Image lightbox
     initLightbox();
 
-    // 4. Code language labels
-    initCodeLangLabels();
+    // 4. Code blocks (wrapping, language labelling, copy button, webkit-scrollbar)
+    initCodeBlocks();
 
     // 5. Share buttons
     initShareButtons();
@@ -707,22 +729,7 @@ const jsonLdSchema = JSON.stringify({
 </script>
 
 <style>
-  .code-copy-btn {
-    position: absolute; top: 0.5rem; right: 0.5rem;
-    padding: 0.2rem 0.6rem; font-size: 0.75rem;
-    font-family: var(--font-sans); color: #999;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 4px; cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
-  }
   .prose pre { position: relative; }
-  .prose pre:hover .code-copy-btn { opacity: 1; }
-  .code-copy-btn:hover {
-    color: #d4d4d4;
-    background: rgba(255, 255, 255, 0.15);
-  }
   .reading-progress {
     position: fixed; top: 0; left: 0; height: 3px;
     background: var(--color-accent); z-index: 200;
