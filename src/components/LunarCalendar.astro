@@ -1,0 +1,452 @@
+---
+// Chinese Lunar Almanac Interactive Calendar Component
+---
+<div class="glass-card calendar-card">
+  <div class="calendar-inner">
+    <!-- 日历头部 -->
+    <div class="calendar-header">
+      <div class="header-left">
+        <span class="header-month" id="calendar-header-month">2026年 6月</span>
+      </div>
+      <div class="header-right">
+        <button id="cal-prev" class="cal-nav-btn" aria-label="上个月">&larr;</button>
+        <button id="cal-today" class="cal-nav-btn today-btn">今</button>
+        <button id="cal-next" class="cal-nav-btn" aria-label="下个月">&rarr;</button>
+      </div>
+    </div>
+
+    <!-- 星期表头 -->
+    <div class="calendar-weekdays">
+      <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+    </div>
+
+    <!-- 日期网格 -->
+    <div class="calendar-grid" id="calendar-days-grid">
+      <!-- Days populated by JS -->
+    </div>
+
+    <!-- 农历老黄历黄黑道宜忌详细板块 -->
+    <div class="almanac-panel" id="almanac-panel">
+      <div class="almanac-primary">
+        <div class="almanac-solar-date">
+          <span id="almanac-date-str">2026年6月13日</span>
+          <span id="almanac-weekday-str">星期六</span>
+          <span id="almanac-holiday-tag" class="holiday-tag" style="display:none;">端午节</span>
+        </div>
+        <div class="almanac-lunar-date">
+          <span id="almanac-lunar-str">农历 丙午年 四月廿八</span>
+          <span id="almanac-lunar-gz" class="lunar-gz">【蛇年】丙午月 戊申日</span>
+        </div>
+      </div>
+      
+      <div class="almanac-yi-ji">
+        <div class="yi-row">
+          <span class="badge-yi">宜</span>
+          <p id="almanac-yi-content" class="yi-ji-text">嫁娶、纳采、出行、开市、动土</p>
+        </div>
+        <div class="ji-row">
+          <span class="badge-ji">忌</span>
+          <p id="almanac-ji-content" class="yi-ji-text">安葬、作灶、伐木、入宅、安门</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { Solar, Lunar, HolidayUtil } from 'lunar-javascript';
+
+  function initCalendar() {
+    const gridEl = document.getElementById('calendar-days-grid');
+    const monthHeaderEl = document.getElementById('calendar-header-month');
+    const prevBtn = document.getElementById('cal-prev');
+    const nextBtn = document.getElementById('cal-next');
+    const todayBtn = document.getElementById('cal-today');
+
+    // Almanac detail elements
+    const detailDateStr = document.getElementById('almanac-date-str');
+    const detailWeekdayStr = document.getElementById('almanac-weekday-str');
+    const detailLunarStr = document.getElementById('almanac-lunar-str');
+    const detailLunarGz = document.getElementById('almanac-lunar-gz');
+    const detailYi = document.getElementById('almanac-yi-content');
+    const detailJi = document.getElementById('almanac-ji-content');
+    const holidayTag = document.getElementById('almanac-holiday-tag');
+
+    if (!gridEl || !monthHeaderEl || !prevBtn || !nextBtn || !todayBtn || !detailDateStr) return;
+
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth(); // 0-indexed
+    let selectedDateKey = getFormatKey(new Date());
+
+    function getFormatKey(date: Date) {
+      return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    }
+
+    function updateAlmanacDetail(date: Date) {
+      const solar = Solar.fromDate(date);
+      const lunar = Lunar.fromDate(date);
+
+      // 阳历与星期
+      detailDateStr!.textContent = `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`;
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      detailWeekdayStr!.textContent = weekdays[date.getDay()];
+
+      // 节日/节气/放假判定
+      let tagText = '';
+      const holiday = HolidayUtil.getHoliday(solar.getYear(), solar.getMonth(), solar.getDay());
+      if (holiday) {
+        tagText = holiday.getName() + (holiday.isWork() ? ' (班)' : ' (放假)');
+      } else {
+        // 取农历节日或公历节日
+        const lunarFestivals = lunar.getFestivals();
+        const solarFestivals = solar.getFestivals();
+        const jieQi = lunar.getJieQi();
+        if (lunarFestivals.length > 0) tagText = lunarFestivals[0];
+        else if (solarFestivals.length > 0) tagText = solarFestivals[0];
+        else if (jieQi) tagText = jieQi;
+      }
+
+      if (tagText) {
+        holidayTag!.textContent = tagText;
+        holidayTag!.style.display = 'inline-block';
+      } else {
+        holidayTag!.style.display = 'none';
+      }
+
+      // 农历字符串
+      detailLunarStr!.textContent = `农历 ${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+      detailLunarGz!.textContent = `【${lunar.getYearShengXiao()}年】${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`;
+
+      // 宜忌
+      const yiList = lunar.getDayYi();
+      const jiList = lunar.getDayJi();
+      detailYi!.textContent = yiList.length > 0 ? yiList.join('、') : '诸事不宜';
+      detailJi!.textContent = jiList.length > 0 ? jiList.join('、') : '诸事无忌';
+    }
+
+    function renderCalendar() {
+      gridEl!.innerHTML = '';
+      monthHeaderEl!.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+      // 算出该月第一天是星期几
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+      // 算出该月有多少天
+      const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+      // 算出上个月有多少天
+      const prevTotalDays = new Date(currentYear, currentMonth, 0).getDate();
+
+      const today = new Date();
+      const todayKey = getFormatKey(today);
+
+      // 1. 上个月填充的尾巴
+      for (let i = firstDayIndex; i > 0; i--) {
+        const dayNum = prevTotalDays - i + 1;
+        const cellDate = new Date(currentYear, currentMonth - 1, dayNum);
+        createDayCell(cellDate, dayNum, true);
+      }
+
+      // 2. 本月天数
+      for (let i = 1; i <= totalDays; i++) {
+        const cellDate = new Date(currentYear, currentMonth, i);
+        createDayCell(cellDate, i, false);
+      }
+
+      // 3. 下个月填充的头部 (填满42格网格)
+      const currentGridCount = firstDayIndex + totalDays;
+      const nextMonthDaysNeeded = 42 - currentGridCount;
+      for (let i = 1; i <= nextMonthDaysNeeded; i++) {
+        const cellDate = new Date(currentYear, currentMonth + 1, i);
+        createDayCell(cellDate, i, true);
+      }
+
+      // 默认更新详细卡片为当前选中日期
+      const parsedParts = selectedDateKey.split('-');
+      const activeDate = new Date(parseInt(parsedParts[0]), parseInt(parsedParts[1]), parseInt(parsedParts[2]));
+      updateAlmanacDetail(activeDate);
+    }
+
+    function createDayCell(date: Date, dayNum: number, isOtherMonth: boolean) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell';
+      if (isOtherMonth) cell.classList.add('other-month');
+
+      const dateKey = getFormatKey(date);
+      if (dateKey === selectedDateKey) cell.classList.add('selected');
+
+      const today = new Date();
+      if (dateKey === getFormatKey(today)) cell.classList.add('today');
+
+      // 阳历号
+      const solarNum = document.createElement('span');
+      solarNum.className = 'solar-num';
+      solarNum.textContent = dayNum.toString();
+      cell.appendChild(solarNum);
+
+      // 农历标签
+      const lunar = Lunar.fromDate(date);
+      const lunarLabel = document.createElement('span');
+      lunarLabel.className = 'lunar-label';
+      
+      // 节气/节日优先，没有则显示农历日期（如 初一/廿八）
+      let labelText = lunar.getDayInChinese();
+      if (lunar.getDay() === 1) labelText = lunar.getMonthInChinese() + '月';
+      
+      const holiday = HolidayUtil.getHoliday(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      const jieQi = lunar.getJieQi();
+      const lunarFests = lunar.getFestivals();
+      
+      if (holiday && !holiday.isWork()) {
+        labelText = holiday.getName().substring(0, 3);
+        cell.classList.add('has-holiday');
+      } else if (jieQi) {
+        labelText = jieQi;
+        cell.classList.add('has-jieqi');
+      } else if (lunarFests.length > 0) {
+        labelText = lunarFests[0].substring(0, 3);
+      }
+      
+      lunarLabel.textContent = labelText;
+      cell.appendChild(lunarLabel);
+
+      // 单元格点击事件
+      cell.addEventListener('click', () => {
+        // 移除其他选中
+        const prevSelected = gridEl!.querySelector('.calendar-day-cell.selected');
+        if (prevSelected) prevSelected.classList.remove('selected');
+        
+        cell.classList.add('selected');
+        selectedDateKey = dateKey;
+        updateAlmanacDetail(date);
+      });
+
+      gridEl!.appendChild(cell);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+
+    todayBtn.addEventListener('click', () => {
+      const today = new Date();
+      currentYear = today.getFullYear();
+      currentMonth = today.getMonth();
+      selectedDateKey = getFormatKey(today);
+      renderCalendar();
+    });
+
+    // 首次渲染
+    renderCalendar();
+  }
+
+  document.addEventListener('astro:page-load', initCalendar);
+</script>
+
+<style>
+  .calendar-card {
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .calendar-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+  .calendar-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.6rem;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  .header-month {
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .header-right {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .cal-nav-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.78rem;
+    transition: all 0.2s ease;
+  }
+  .cal-nav-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .today-btn {
+    font-weight: 600;
+  }
+  .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    opacity: 0.8;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 46px;
+    gap: 2px;
+  }
+  
+  /* Day Cells */
+  :global(.calendar-day-cell) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    border: 1px solid transparent;
+  }
+  :global(.calendar-day-cell:hover) {
+    background: var(--border-color);
+    border-color: var(--text-muted);
+  }
+  :global(.calendar-day-cell.other-month) {
+    opacity: 0.3;
+  }
+  :global(.calendar-day-cell.today) {
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent);
+  }
+  :global(.calendar-day-cell.today .solar-num) {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+  :global(.calendar-day-cell.selected) {
+    background: var(--color-accent) !important;
+    border-color: var(--color-accent);
+  }
+  :global(.calendar-day-cell.selected .solar-num),
+  :global(.calendar-day-cell.selected .lunar-label) {
+    color: #ffffff !important;
+  }
+  :global(.solar-num) {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-main);
+  }
+  :global(.lunar-label) {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  :global(.calendar-day-cell.has-holiday .lunar-label) {
+    color: #e63946;
+  }
+  :global(.calendar-day-cell.has-jieqi .lunar-label) {
+    color: #2a9d8f;
+  }
+
+  /* Almanac detail panel */
+  .almanac-panel {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .almanac-primary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .almanac-solar-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-serif);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .holiday-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: #e63946;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+  }
+  .almanac-lunar-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .lunar-gz {
+    opacity: 0.8;
+  }
+  .almanac-yi-ji {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--border-color);
+    padding: 0.8rem;
+    border-radius: var(--radius-sm);
+  }
+  .yi-row, .ji-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .badge-yi, .badge-ji {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #ffffff;
+    padding: 0.15rem 0.45rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge-yi {
+    background: #2a9d8f;
+  }
+  .badge-ji {
+    background: #e63946;
+  }
+  .yi-ji-text {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-main);
+    margin: 0;
+  }
+</style>

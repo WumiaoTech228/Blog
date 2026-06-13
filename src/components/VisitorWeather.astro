@@ -1,0 +1,180 @@
+---
+// Weather and IP widget Header (standard Astro component)
+---
+<div class="glass-card visitor-card">
+  <div class="visitor-inner">
+    <div class="visitor-title">
+      <span class="visitor-icon">🌐</span>
+      <span>访客雷达</span>
+    </div>
+    
+    <div class="visitor-data-row">
+      <div class="visitor-data-item">
+        <div class="data-label">您的 IP 地址</div>
+        <div id="visitor-ip" class="data-value">获取中...</div>
+      </div>
+      <div class="visitor-data-item">
+        <div class="data-label">地理位置</div>
+        <div id="visitor-geo" class="data-value">获取中...</div>
+      </div>
+    </div>
+
+    <div class="weather-display" id="weather-display">
+      <div class="weather-left">
+        <div id="weather-temp" class="weather-temp">--°C</div>
+        <div id="weather-text" class="weather-text">多云转晴</div>
+      </div>
+      <div class="weather-right">
+        <div id="weather-tips" class="weather-tips">加载实时天气建议...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initVisitorWidget() {
+    const ipEl = document.getElementById('visitor-ip');
+    const geoEl = document.getElementById('visitor-geo');
+    const tempEl = document.getElementById('weather-temp');
+    const textEl = document.getElementById('weather-text');
+    const tipsEl = document.getElementById('weather-tips');
+    
+    if (!ipEl || !geoEl || !tempEl || !textEl || !tipsEl) return;
+
+    async function loadData() {
+      try {
+        const response = await fetch('/api/weather');
+        if (response.ok) {
+          const data = await response.json();
+          ipEl.textContent = data.ip || 'Unknown';
+          geoEl.textContent = data.location || '未知位置';
+          
+          if (data.weather) {
+            tempEl.textContent = data.weather.temp;
+            textEl.textContent = data.weather.weatherText;
+            
+            // Set dynamic weather-based greeting suggestions
+            const weatherText = data.weather.weatherText;
+            let tip = '祝你有美好的一天！✨';
+            if (weatherText.includes('晴')) {
+              tip = '今天阳光明媚，适合出去散散步走走喔！☀️';
+            } else if (weatherText.includes('雨')) {
+              tip = '外面正在下雨，出门记得带把伞喔 🌧️';
+            } else if (weatherText.includes('云') || weatherText.includes('阴')) {
+              tip = '天气有些阴沉/多云，适合坐在窗前静静写代码 ☁️';
+            } else if (weatherText.includes('雪')) {
+              tip = '外面下雪了！注意保暖，堆个雪人吧 ❄️';
+            } else if (weatherText.includes('雷') || weatherText.includes('阵')) {
+              tip = '可能有局部强对流天气，注意安全防雷避雨 ⚡';
+            } else if (weatherText.includes('雾')) {
+              tip = '雾天能见度较低，出行一定要注意安全 🌫️';
+            }
+            tipsEl.textContent = tip;
+          }
+        } else {
+          fallbackLocally();
+        }
+      } catch (err) {
+        console.error('Failed to fetch visitor radar stats:', err);
+        fallbackLocally();
+      }
+    }
+
+    function fallbackLocally() {
+      ipEl.textContent = '127.0.0.1 (本地代理)';
+      geoEl.textContent = '环球星辰';
+      tempEl.textContent = '22°C';
+      textEl.textContent = '晴朗';
+      tipsEl.textContent = '无法建立云盾连接。相信直觉，静享写码！☕';
+    }
+
+    loadData();
+  }
+
+  document.addEventListener('astro:page-load', initVisitorWidget);
+</script>
+
+<style>
+  .visitor-card {
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .visitor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+  .visitor-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .visitor-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .visitor-data-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+  }
+  .visitor-data-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .data-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .data-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+    word-break: break-all;
+  }
+  .weather-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+  }
+  .weather-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex-shrink: 0;
+  }
+  .weather-temp {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1.1;
+  }
+  .weather-text {
+    font-size: 0.82rem;
+    color: var(--text-main);
+    font-weight: 500;
+  }
+  .weather-right {
+    display: flex;
+    align-items: center;
+    background: var(--border-color);
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    flex-grow: 1;
+  }
+  .weather-tips {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+</style>

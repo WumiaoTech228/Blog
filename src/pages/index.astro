@@ -2,6 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
+import Hitokoto from '../components/Hitokoto.astro';
+import LunarCalendar from '../components/LunarCalendar.astro';
+import VisitorWeather from '../components/VisitorWeather.astro';
 import { getCollection } from 'astro:content';
 import { SITE } from '../config';
 import { getPostReadingTime, getPostSlug, getPublishedPosts } from '../utils/posts';
@@ -247,10 +250,24 @@ try {
               </div>
             </div>
           </ScrollReveal>
+
+          <!-- 访客雷达 & 每日一言 -->
+          <ScrollReveal animation="fade-up" delay={180}>
+            <VisitorWeather />
+          </ScrollReveal>
+          
+          <ScrollReveal animation="fade-up" delay={210}>
+            <Hitokoto />
+          </ScrollReveal>
         </div>
 
         <!-- 右侧列：开发栈 + 桌面环境 -->
         <div class="about-toolbox-panel">
+          <!-- 时光黄历日历 -->
+          <ScrollReveal animation="fade-up" delay={50}>
+            <LunarCalendar />
+          </ScrollReveal>
+
           <!-- 开发栈 -->
           <ScrollReveal animation="fade-up" delay={100}>
             <div class="glass-card about-right-card">

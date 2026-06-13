@@ -34,25 +34,29 @@ const currentYear = new Date().getFullYear();
     </p>
   </div>
 </footer>
-
 <script>
   function initUptime() {
     const el = document.getElementById('footer-uptime-text');
     if (!el) return;
     const uptimeEl = el;
-    // 站点上线日期 (请根据实际调整)
-    const startDate = new Date('2025-05-01T00:00:00');
+    // 站点上线日期：今天下午一时二十五分三十二秒 (13:25:32)
+    const startDate = new Date('2026-06-13T13:25:32');
     function update() {
       const now = new Date();
       const diff = now.getTime() - startDate.getTime();
+      if (diff < 0) {
+        uptimeEl.textContent = `本站即将上线`;
+        return;
+      }
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      uptimeEl.textContent = `本站已运行 ${days} 天 ${hours} 小时 ${mins} 分钟`;
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      uptimeEl.textContent = `本站已安全运行 ${days}天 ${hours}小时 ${mins}分 ${secs}秒`;
     }
     update();
-    // Update every minute
-    const timer = setInterval(update, 60000);
+    // Update every second
+    const timer = setInterval(update, 1000);
     // Clean up on page swap
     document.addEventListener('astro:before-swap', () => clearInterval(timer), { once: true });
   }
