@@ -227,10 +227,10 @@
     
     const items = drawerList.querySelectorAll('.playlist-item');
     items.forEach(item => {
-      item.addEventListener('click', async (e) => {
+      item.addEventListener('click', (e) => {
         e.stopPropagation();
         const index = parseInt(item.getAttribute('data-index') || '0', 10);
-        await loadTrack(index);
+        loadTrack(index);
         const { audio: currentAudio } = getAudioElements();
         currentAudio?.play().then(syncUIState).catch(() => {});
       });
@@ -250,44 +250,30 @@
     }
   }
 
-  async function loadTrack(index: number) {
+  function loadTrack(index: number) {
     const { audio, trackNameEl, trackStatusEl, currentTimeEl, totalTimeEl, progressSlider } = getAudioElements();
     if (!audio) return;
 
     const track = activeTracks[index];
     if (!track) return;
+
+    // Use a direct redirect Meting service to stream the VIP or regular song directly
+    if (track.id) {
+      audio.src = `https://v.iarc.top/?server=netease&type=url&id=${track.id}`;
+    } else {
+      audio.src = track.url;
+    }
+
     audio.dataset.currentIndex = index.toString();
     if (trackNameEl) trackNameEl.textContent = track.name;
     if (trackStatusEl) {
-      trackStatusEl.textContent = '获取音源中...';
+      trackStatusEl.textContent = audio.paused ? '已暂停' : track.artist;
     }
     if (currentTimeEl) currentTimeEl.textContent = '00:00';
     if (totalTimeEl) totalTimeEl.textContent = '00:00';
     if (progressSlider) progressSlider.value = '0';
 
     renderPlaylist();
-
-    let playUrl = track.url;
-    if (track.id) {
-      try {
-        const response = await fetch(`https://api.injahow.cn/meting/?type=url&id=${track.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.url) {
-            playUrl = data.url;
-          }
-        }
-      } catch (err) {
-        console.warn('Meting API 获取音源失败，将尝试默认直链:', err);
-      }
-    }
-
-    if (audio.dataset.currentIndex === index.toString()) {
-      audio.src = playUrl;
-      if (trackStatusEl) {
-        trackStatusEl.textContent = audio.paused ? '已暂停' : track.artist;
-      }
-    }
   }
 
   function syncUIState() {
@@ -334,25 +320,25 @@
     }
   }
 
-  async function playNext() {
+  function playNext() {
     const { audio } = getAudioElements();
     if (!audio) return;
 
     let currentIndex = parseInt(audio.dataset.currentIndex || '0', 10);
     currentIndex = (currentIndex + 1) % activeTracks.length;
-    await loadTrack(currentIndex);
+    loadTrack(currentIndex);
     audio.play()
       .then(syncUIState)
       .catch(err => console.debug('播放下一首受阻:', err));
   }
 
-  async function playPrev() {
+  function playPrev() {
     const { audio } = getAudioElements();
     if (!audio) return;
 
     let currentIndex = parseInt(audio.dataset.currentIndex || '0', 10);
     currentIndex = (currentIndex - 1 + activeTracks.length) % activeTracks.length;
-    await loadTrack(currentIndex);
+    loadTrack(currentIndex);
     audio.play()
       .then(syncUIState)
       .catch(err => console.debug('播放上一首受阻:', err));
