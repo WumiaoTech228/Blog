@@ -5,7 +5,7 @@ export function generateCSP(nonce: string): string {
     "img-src 'self' data: https:" ,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "media-src 'self' https://cdn.jsdelivr.net https://music.163.com",
+    "media-src 'self' data: blob: https:",
     "connect-src 'self'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
