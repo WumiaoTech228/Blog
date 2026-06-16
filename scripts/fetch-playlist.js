@@ -15,7 +15,12 @@ async function main() {
       const stats = fs.statSync(outputPath);
       const mtime = stats.mtime.getTime();
       const ageHours = (Date.now() - mtime) / (1000 * 60 * 60);
-      const forceFetch = process.env.FORCE_FETCH_PLAYLIST === 'true';
+      const isCI = process.env.CF_PAGES === '1' || process.env.CI === 'true';
+      const forceFetch = process.env.FORCE_FETCH_PLAYLIST === 'true' || isCI;
+      
+      if (isCI) {
+        console.log('[Build Hook] Running in CI environment (Cloudflare Pages). Bypassing playlist cache check.');
+      }
       
       const content = fs.readFileSync(outputPath, 'utf8');
       const parsed = JSON.parse(content);
@@ -75,6 +80,7 @@ async function main() {
           for (const s of detailData.songs) {
             const artists = s.artists ? s.artists.map(a => a.name).join('/') : '未知歌手';
             tracks.push({
+              id: s.id,
               name: s.name,
               artist: artists,
               url: `https://music.163.com/song/media/outer/url?id=${s.id}.mp3`
