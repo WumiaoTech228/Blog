@@ -241,6 +241,9 @@
   }
 
   function syncLyrics(currentTime: number) {
+    if (currentTime < 0.5) {
+      currentLyricIndex = -1;
+    }
     if (currentLyrics.length === 0) return;
 
     let nextIndex = -1;
@@ -254,6 +257,11 @@
 
     if (nextIndex >= 0) {
       showLyricLine(nextIndex);
+    } else {
+      // 进度在最开始且未到第一句歌词时，隐藏歌词
+      const { lyricsOverlay, lyricsLineEl } = getAudioElements();
+      lyricsOverlay?.classList.remove('is-visible');
+      if (lyricsLineEl) lyricsLineEl.textContent = '';
     }
   }
 
