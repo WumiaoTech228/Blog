@@ -134,6 +134,11 @@
   </div>
 </div>
 
+<div id="lofi-lyrics-overlay" class="lyrics-overlay" aria-live="polite" transition:persist>
+  <div id="lofi-lyrics-line" class="lyrics-line"></div>
+  <div id="lofi-lyrics-meta" class="lyrics-meta"></div>
+</div>
+
 <script>
   interface Track {
     id?: number;
@@ -142,12 +147,21 @@
     url: string;
   }
 
+  interface LyricLine {
+    time: number;
+    text: string;
+  }
+
   import DEFAULT_TRACKS from '../data/netease-playlist.json';
 
   const activeTracks: Track[] = [...DEFAULT_TRACKS];
 
   let consecutiveErrors = 0;
   let isDraggingProgress = false;
+  const lyricsCache = new Map<number, LyricLine[]>();
+  let currentLyrics: LyricLine[] = [];
+  let currentLyricIndex = -1;
+  let lyricsRequestToken = 0;
 
 
   function getAudioElements() {
@@ -168,8 +182,106 @@
     const progressSlider = document.getElementById('lofi-progress-slider') as HTMLInputElement | null;
     const currentTimeEl = document.getElementById('lofi-current-time') as HTMLElement | null;
     const totalTimeEl = document.getElementById('lofi-total-time') as HTMLElement | null;
+    const lyricsOverlay = document.getElementById('lofi-lyrics-overlay') as HTMLElement | null;
+    const lyricsLineEl = document.getElementById('lofi-lyrics-line') as HTMLElement | null;
+    const lyricsMetaEl = document.getElementById('lofi-lyrics-meta') as HTMLElement | null;
 
-    return { audio, container, vinyl, playBtn, prevBtn, nextBtn, muteBtn, trackNameEl, trackStatusEl, listBtn, drawer, drawerList, progressSlider, currentTimeEl, totalTimeEl };
+    return { audio, container, vinyl, playBtn, prevBtn, nextBtn, muteBtn, trackNameEl, trackStatusEl, listBtn, drawer, drawerList, progressSlider, currentTimeEl, totalTimeEl, lyricsOverlay, lyricsLineEl, lyricsMetaEl };
+  }
+
+  function parseLyrics(raw: string): LyricLine[] {
+    return raw
+      .split(/\r?\n/)
+      .flatMap(line => {
+        const text = line.replace(/\[[^\]]+\]/g, '').trim();
+        if (!text) return [];
+
+        const matches = [...line.matchAll(/\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g)];
+        return matches.map(match => {
+          const minutes = parseInt(match[1], 10);
+          const seconds = parseInt(match[2], 10);
+          const fraction = match[3] ? parseInt(match[3].padEnd(3, '0').slice(0, 3), 10) / 1000 : 0;
+          return {
+            time: minutes * 60 + seconds + fraction,
+            text
+          };
+        });
+      })
+      .sort((a, b) => a.time - b.time);
+  }
+
+  function clearLyrics() {
+    currentLyrics = [];
+    currentLyricIndex = -1;
+    const { lyricsOverlay, lyricsLineEl, lyricsMetaEl } = getAudioElements();
+    lyricsOverlay?.classList.remove('is-visible');
+    if (lyricsLineEl) lyricsLineEl.textContent = '';
+    if (lyricsMetaEl) lyricsMetaEl.textContent = '';
+  }
+
+  function updateLyricsMeta(track: Track) {
+    const { lyricsMetaEl } = getAudioElements();
+    if (lyricsMetaEl) {
+      lyricsMetaEl.textContent = `-- ${track.name} / ${track.artist}`;
+    }
+  }
+
+  function showLyricLine(index: number) {
+    if (index === currentLyricIndex || !currentLyrics[index]) return;
+
+    const currentIndex = parseInt(getAudioElements().audio?.dataset.currentIndex || '0', 10);
+    const track = activeTracks[currentIndex];
+    const { lyricsOverlay, lyricsLineEl } = getAudioElements();
+    if (!lyricsOverlay || !lyricsLineEl || !track) return;
+
+    currentLyricIndex = index;
+    lyricsLineEl.textContent = currentLyrics[index].text;
+    updateLyricsMeta(track);
+    lyricsOverlay.classList.add('is-visible');
+  }
+
+  function syncLyrics(currentTime: number) {
+    if (currentLyrics.length === 0) return;
+
+    let nextIndex = -1;
+    for (let i = 0; i < currentLyrics.length; i++) {
+      if (currentLyrics[i].time <= currentTime + 0.25) {
+        nextIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    if (nextIndex >= 0) {
+      showLyricLine(nextIndex);
+    }
+  }
+
+  async function loadLyrics(track: Track) {
+    const token = ++lyricsRequestToken;
+    clearLyrics();
+    if (!track.id) return;
+
+    try {
+      if (!lyricsCache.has(track.id)) {
+        const response = await fetch(`https://music.163.com/api/song/lyric?id=${track.id}&lv=1&kv=1&tv=-1`);
+        if (!response.ok) throw new Error(`Lyrics request failed: ${response.status}`);
+
+        const data = await response.json();
+        const lyricText = data?.lrc?.lyric || '';
+        lyricsCache.set(track.id, parseLyrics(lyricText));
+      }
+
+      if (token !== lyricsRequestToken) return;
+      currentLyrics = lyricsCache.get(track.id) || [];
+      currentLyricIndex = -1;
+      updateLyricsMeta(track);
+    } catch (err) {
+      console.debug('姝岃瘝鍔犺浇澶辫触:', err);
+      if (token === lyricsRequestToken) {
+        clearLyrics();
+      }
+    }
   }
 
   function renderPlaylist() {
@@ -272,6 +384,7 @@
     if (currentTimeEl) currentTimeEl.textContent = '00:00';
     if (totalTimeEl) totalTimeEl.textContent = '00:00';
     if (progressSlider) progressSlider.value = '0';
+    loadLyrics(track);
 
     renderPlaylist();
   }
@@ -517,6 +630,7 @@
         progressSlider.value = ((current / duration) * 100).toString();
       }
       if (currentTimeEl) currentTimeEl.textContent = formatTime(current);
+      syncLyrics(current);
     });
 
     audio.addEventListener('loadedmetadata', () => {
@@ -529,6 +643,49 @@
 </script>
 
 <style>
+  .lyrics-overlay {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 998;
+    max-width: min(34rem, calc(100vw - 4rem));
+    color: var(--text-primary);
+    font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+    font-style: italic;
+    line-height: 1.7;
+    text-align: right;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.5rem);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .lyrics-overlay.is-visible {
+    opacity: 0.82;
+    transform: translateY(0);
+  }
+
+  .lyrics-line {
+    overflow-wrap: anywhere;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+  }
+
+  .lyrics-meta {
+    margin-top: 0.25rem;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .lyrics-overlay {
+      right: 1rem;
+      bottom: 5.75rem;
+      max-width: calc(100vw - 2rem);
+      font-size: 0.95rem;
+    }
+  }
+
   /* ==========================================
      Lofi Music Player - Premium Glassmorphism
      ========================================== */
