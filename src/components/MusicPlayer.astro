@@ -264,11 +264,12 @@
 
     try {
       if (!lyricsCache.has(track.id)) {
-        const response = await fetch(`https://music.163.com/api/song/lyric?id=${track.id}&lv=1&kv=1&tv=-1`);
+        // 使用更宽松的歌词镜像 API，避免官方 API 的跨域和限制限制
+        const response = await fetch(`https://v.iarc.top/?server=netease&type=lyric&id=${track.id}`);
         if (!response.ok) throw new Error(`Lyrics request failed: ${response.status}`);
 
         const data = await response.json();
-        const lyricText = data?.lrc?.lyric || '';
+        const lyricText = data?.lyric || '';
         lyricsCache.set(track.id, parseLyrics(lyricText));
       }
 
