@@ -222,7 +222,7 @@
   function updateLyricsMeta(track: Track) {
     const { lyricsMetaEl } = getAudioElements();
     if (lyricsMetaEl) {
-      lyricsMetaEl.textContent = `-- ${track.name} / ${track.artist}`;
+       lyricsMetaEl.textContent = `—— ${track.name} / ${track.artist}`;
     }
   }
 
@@ -650,9 +650,9 @@
     z-index: 998;
     max-width: min(34rem, calc(100vw - 4rem));
     color: var(--text-primary);
-    font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+    font-family: "Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
     font-style: italic;
-    line-height: 1.7;
+    line-height: 1.6;
     text-align: right;
     opacity: 0;
     pointer-events: none;
@@ -667,14 +667,16 @@
 
   .lyrics-line {
     overflow-wrap: anywhere;
-    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    font-size: 0.85rem;
+    font-weight: 500;
   }
 
   .lyrics-meta {
     margin-top: 0.25rem;
     overflow-wrap: anywhere;
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
+    display: block;
   }
 
   @media (max-width: 768px) {
@@ -682,7 +684,6 @@
       right: 1rem;
       bottom: 5.75rem;
       max-width: calc(100vw - 2rem);
-      font-size: 0.95rem;
     }
   }
 
