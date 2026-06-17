@@ -268,8 +268,25 @@
         const response = await fetch(`https://v.iarc.top/?server=netease&type=lyric&id=${track.id}`);
         if (!response.ok) throw new Error(`Lyrics request failed: ${response.status}`);
 
-        const data = await response.json();
-        const lyricText = data?.lyric || '';
+        let lyricText = '';
+        const contentType = response.headers.get('content-type') || '';
+        
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          lyricText = data?.lyric || '';
+        } else {
+          // 很多 Meting API 镜像其实会直接返回纯文本 (LRC)
+          const text = await response.text();
+          try {
+            // 尝试看看是不是 JSON 字符串
+            const data = JSON.parse(text);
+            lyricText = data?.lyric || text;
+          } catch(e) {
+            // 解析失败说明确实是纯文本，直接赋值
+            lyricText = text;
+          }
+        }
+        
         lyricsCache.set(track.id, parseLyrics(lyricText));
       }
 
