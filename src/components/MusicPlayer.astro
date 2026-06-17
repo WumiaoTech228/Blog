@@ -277,7 +277,7 @@
       currentLyricIndex = -1;
       updateLyricsMeta(track);
     } catch (err) {
-      console.debug('姝岃瘝鍔犺浇澶辫触:', err);
+      console.debug('歌词加载失败:', err);
       if (token === lyricsRequestToken) {
         clearLyrics();
       }
