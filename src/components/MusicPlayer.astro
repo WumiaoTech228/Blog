@@ -588,55 +588,76 @@
       }
     });
 
-    // Audio status listeners to update UI dynamically
-    audio.addEventListener('play', () => {
-      consecutiveErrors = 0;
-      const { trackStatusEl } = getAudioElements();
+    // 避免重复在 audio 绑定同一事件监听器导致歌词被同步多次或内存泄漏
+    audio.removeEventListener('play', onAudioPlay);
+    audio.removeEventListener('pause', onAudioPause);
+    audio.removeEventListener('ended', onAudioEnded);
+    audio.removeEventListener('error', onAudioError);
+    audio.removeEventListener('timeupdate', onAudioTimeUpdate);
+    audio.removeEventListener('loadedmetadata', onAudioLoadedMetadata);
+
+    audio.addEventListener('play', onAudioPlay);
+    audio.addEventListener('pause', onAudioPause);
+    audio.addEventListener('ended', onAudioEnded);
+    audio.addEventListener('error', onAudioError);
+    audio.addEventListener('timeupdate', onAudioTimeUpdate);
+    audio.addEventListener('loadedmetadata', onAudioLoadedMetadata);
+  }
+
+  function onAudioPlay() {
+    consecutiveErrors = 0;
+    const { trackStatusEl } = getAudioElements();
+    if (trackStatusEl) {
+      trackStatusEl.style.color = '';
+    }
+    syncUIState();
+  }
+
+  function onAudioPause() {
+    syncUIState();
+  }
+
+  function onAudioEnded() {
+    playNext();
+  }
+
+  function onAudioError(e: Event) {
+    console.warn('播放失败，自动为您跳过至下一首。', e);
+    const { trackStatusEl } = getAudioElements();
+    if (trackStatusEl) {
+      trackStatusEl.textContent = '⚠️ 加载失败，正在跳过...';
+      trackStatusEl.style.color = '#ef4444';
+    }
+    consecutiveErrors++;
+    const { audio } = getAudioElements();
+    if (consecutiveErrors >= activeTracks.length) {
+      console.error('所有曲目均加载失败。请检查网络连接或资源可用性。');
       if (trackStatusEl) {
-        trackStatusEl.style.color = '';
+        trackStatusEl.textContent = '⚠️ 播放资源不可用';
       }
+      audio?.pause();
       syncUIState();
-    });
-    audio.addEventListener('pause', syncUIState);
-    audio.addEventListener('ended', playNext);
-    audio.addEventListener('error', (e) => {
-      console.warn('播放失败，自动为您跳过至下一首。', e);
-      
-      const { trackStatusEl } = getAudioElements();
-      if (trackStatusEl) {
-        trackStatusEl.textContent = '⚠️ 加载失败，正在跳过...';
-        trackStatusEl.style.color = '#ef4444';
-      }
-      
-      consecutiveErrors++;
-      if (consecutiveErrors >= activeTracks.length) {
-        console.error('所有曲目均加载失败。请检查网络连接或资源可用性。');
-        if (trackStatusEl) {
-          trackStatusEl.textContent = '⚠️ 播放资源不可用';
-        }
-        audio.pause();
-        syncUIState();
-        consecutiveErrors = 0; // reset
-        return;
-      }
-      
-      setTimeout(playNext, 1500);
-    });
+      consecutiveErrors = 0; // reset
+      return;
+    }
+    setTimeout(playNext, 1500);
+  }
 
-    audio.addEventListener('timeupdate', () => {
-      if (!audio.duration || isDraggingProgress) return;
-      const current = audio.currentTime;
-      const duration = audio.duration;
-      if (progressSlider) {
-        progressSlider.value = ((current / duration) * 100).toString();
-      }
-      if (currentTimeEl) currentTimeEl.textContent = formatTime(current);
-      syncLyrics(current);
-    });
+  function onAudioTimeUpdate() {
+    const { audio, progressSlider, currentTimeEl } = getAudioElements();
+    if (!audio || !audio.duration || isDraggingProgress) return;
+    const current = audio.currentTime;
+    const duration = audio.duration;
+    if (progressSlider) {
+      progressSlider.value = ((current / duration) * 100).toString();
+    }
+    if (currentTimeEl) currentTimeEl.textContent = formatTime(current);
+    syncLyrics(current);
+  }
 
-    audio.addEventListener('loadedmetadata', () => {
-      if (totalTimeEl) totalTimeEl.textContent = formatTime(audio.duration);
-    });
+  function onAudioLoadedMetadata() {
+    const { audio, totalTimeEl } = getAudioElements();
+    if (audio && totalTimeEl) totalTimeEl.textContent = formatTime(audio.duration);
   }
 
   // Handle initialization on initial load and View Transition page changes
